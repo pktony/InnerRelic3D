@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &493898598
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 493898599}
+  m_Layer: 6
+  m_Name: LookTarget
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &493898599
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 493898598}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 2, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7266468897492639247}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4855443644050543098
 GameObject:
   m_ObjectHideFlags: 0
@@ -175,6 +206,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2411242023301816194}
+  - {fileID: 493898599}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -208,9 +240,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ccbe8a8e208d5614c9c14148886aa86f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  controlMode: 0
   walkSpeed: 3
-  sensitivity: 0.8
-  turnSpeed: 15
+  turnSpeed: 500
+  lockOnEffect: {fileID: 0}
+  lockOnEffect_Ground: {fileID: 0}
 --- !u!114 &6639167308114249148
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -223,8 +257,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0569b82a42755074c8aa49c47d763879, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lockOnEffect: {fileID: 0}
-  lockOnEffect_Ground: {fileID: 0}
 --- !u!1001 &2411242023301416240
 PrefabInstance:
   m_ObjectHideFlags: 0
