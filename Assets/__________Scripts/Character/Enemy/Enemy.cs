@@ -14,7 +14,6 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
     Animator anim;
     NavMeshAgent agent;
     Transform target = null;
-    SphereCollider sphereColl;
 
     [Header("Basic Stats")]
     float healthPoint = 100f;
@@ -47,7 +46,7 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
         get => healthPoint;
         set
         {
-            healthPoint = Mathf.Clamp(value, 0, maxHealthPoint);
+            healthPoint = Mathf.Clamp(value, 0f, maxHealthPoint);
             if (healthPoint > 0f)
             {
                 anim.SetTrigger("onHit");
@@ -56,9 +55,11 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
             }
             else
             {
-                StartCoroutine(SlowMotionOnLastShot());
-                ChangeStatus(EnemyState.Die);
-                Debug.Log("Die");
+                if (!isDead)
+                {
+                    StartCoroutine(SlowMotionOnLastShot());
+                    ChangeStatus(EnemyState.Die);
+                }
             }
         }
     }
@@ -96,9 +97,6 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
                 case EnemyState.Idle:
                     IdleCheck();
                     break;
-                case EnemyState.Patrol:
-                    Patrol();
-                    break;
                 case EnemyState.Track:
                     TrackCheck();
                     break;
@@ -121,16 +119,6 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
         {   // 탐지 범위 내 있으면 추적 
             ChangeStatus(EnemyState.Track);
         }
-
-        // ��� �� Patrol�� �̵�
-        //yield return new WaitForSeconds(timetoPatrol);
-        //ChangeStatus(EnemyState.Patrol);
-    }
-
-    void Patrol()
-    {
-        if (SearchPlayer())
-            ChangeStatus(EnemyState.Track);
     }
 
     void TrackCheck()
@@ -223,7 +211,6 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
     public void TakeDamage(float damage)
     {
         HP -= damage;
-        
     }
     #endregion
 
@@ -236,8 +223,6 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
                 break;
             case EnemyState.Track:
                 anim.SetBool("isMoving", false);
-                break;
-            case EnemyState.Patrol:
                 break;
             case EnemyState.Attack:
                 agent.isStopped = false;
@@ -255,16 +240,15 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
             case EnemyState.Track:
                 anim.SetBool("isMoving", true);
                 break;
-            case EnemyState.Patrol:
-                break;
             case EnemyState.Attack:
                 agent.isStopped = true;
                 break;
             case EnemyState.Knockback:
                 break;
             case EnemyState.Die:
+                isDead = true;
                 agent.isStopped = true;
-                anim.SetBool("isDead", true);
+                anim.SetBool("isDead", isDead);
                 anim.SetTrigger("onDie");
                 break;
         }

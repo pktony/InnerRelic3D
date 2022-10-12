@@ -16,5 +16,7 @@ public class GameManager : Singleton<GameManager>
     {
         mainPlayer = FindObjectOfType<PlayerStats>();
         archerController = FindObjectOfType<PlayerController_Archer>();
+
+        
     }
 }

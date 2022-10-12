@@ -25,6 +25,8 @@ public enum Skills : byte
     Heal,
     SpecialAttack_Sword,
     SpecialAttack_Archer,
+    Defence,
+    Dodge,
     SkillCount
 }
 

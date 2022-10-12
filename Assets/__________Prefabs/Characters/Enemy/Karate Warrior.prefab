@@ -234,7 +234,6 @@ GameObject:
   - component: {fileID: -1436047666667724078}
   - component: {fileID: 7976062525910160417}
   - component: {fileID: 1325977749998247738}
-  - component: {fileID: 8765833700178287616}
   m_Layer: 7
   m_Name: Karate Warrior
   m_TagString: Enemy
@@ -285,10 +284,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   status: 0
-  detectedRange: 7
+  detectedRange: 15
   attackRange: 2.5
   timetoPatrol: 1
-  attackCoolTime: 5
+  attackCoolTime: 3
 --- !u!136 &7976062525910160417
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -325,22 +324,6 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
---- !u!54 &8765833700178287616
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5772143122434580753}
-  serializedVersion: 2
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_UseGravity: 0
-  m_IsKinematic: 1
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
 --- !u!1001 &205724501111591964
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -351,7 +334,7 @@ PrefabInstance:
     - target: {fileID: -8648804298599764280, guid: 8645e0506d8d64d44bda3003df478c3e, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 4e88c250da4576e4da08a761ee2cf703, type: 2}
+      objectReference: {fileID: 2100000, guid: 981fd448c152d4ea4b47fbc82fbd8907, type: 2}
     - target: {fileID: 100108, guid: 8645e0506d8d64d44bda3003df478c3e, type: 3}
       propertyPath: m_Name
       value: Karate
@@ -1870,7 +1853,7 @@ SphereCollider:
   m_IsTrigger: 1
   m_Enabled: 0
   serializedVersion: 2
-  m_Radius: 0.5
+  m_Radius: 1
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &570682867
 MonoBehaviour:

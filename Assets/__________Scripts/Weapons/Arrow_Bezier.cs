@@ -45,7 +45,7 @@ public class Arrow_Bezier : Arrow
     private void InitializeBezierPositions()
     {
         startPoint = transform.position;
-        Transform _target = GameManager.Inst.ArcherController.LockonTarget;
+        Transform _target = GameManager.Inst.Player_Stats.LockonTarget;
         if(_target != null)
         {
             target = _target.position + Vector3.up;
@@ -80,5 +80,21 @@ public class Arrow_Bezier : Arrow
     {
         isHit = true;
         return base.PlayParticles(particle);
+    }
+
+    protected override void OnTriggerEnter(Collider collider)
+    {
+        if (collider.CompareTag("Ground"))
+        {
+            StartCoroutine(PlayParticles(groundHitParticle));
+        }
+        else if (collider.CompareTag("Enemy"))
+        {
+            StartCoroutine(PlayParticles(hitParticle));
+            IBattle target = collider.GetComponent<IBattle>();
+            target?.TakeDamage(GameManager.Inst.Player_Stats.AttackPower);
+        }
+        else
+            Destroy(this.gameObject);
     }
 }
