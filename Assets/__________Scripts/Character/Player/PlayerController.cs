@@ -2,6 +2,9 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Cinemachine;
+using System.Collections;
+using UnityEngine.AI;
+using UnityEngine.iOS;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -9,15 +12,15 @@ using UnityEditor;
 
 public abstract class PlayerController : MonoBehaviour
 {
-    InputActions actions;
+    protected InputActions actions;
     protected Animator anim;
     protected CharacterController controller;
-    private CinemachineVirtualCamera virtualCam;
 
+    public GameObject mainCam;
+    public CinemachineVirtualCamera lockonCam;
 
     PlayerState moveMode = PlayerState.Walk;
-    [SerializeField] protected ControlMode controlMode = ControlMode.Normal;
-    Weapons weaponIndex = Weapons.Sword;
+    protected ControlMode controlMode = ControlMode.Normal;
 
     // ################### Move ######################3
     Vector3 moveDir = Vector3.zero;
@@ -42,8 +45,8 @@ public abstract class PlayerController : MonoBehaviour
     [SerializeField] float lockOnRadius = 20f;
     [SerializeField] GameObject lockOnEffect;
     [SerializeField] GameObject lockOnEffect_Ground;
-    protected Transform lockonTarget;
-    Collider[] lockonCollider = new Collider[5];
+    private Collider[] lockonCollider = new Collider[5];
+    private Transform lockonFollowTarget;
 
     // ################ Weapon Change
     PlayerWeapons playerWeapon;
@@ -51,12 +54,23 @@ public abstract class PlayerController : MonoBehaviour
     // ################## Properties #####################
     public Vector3 LookDir => lookDir;
 
+    public ControlMode ControlMode
+    {
+        get => controlMode;
+        set
+        {
+            controlMode = value;
+        }
+    }
+
     protected virtual void Awake()
     {
         actions = new();
-        controller = GetComponent<CharacterController>();
-        RefreshAnimator(Weapons.Sword);
-        playerWeapon = GetComponent<PlayerWeapons>();
+        controller = GetComponentInParent<CharacterController>();
+        anim = GetComponent<Animator>();
+        lockonFollowTarget = transform.parent.GetChild(2);
+
+        playerWeapon = GetComponentInParent<PlayerWeapons>();
 
         gravity = Physics.gravity;
 
@@ -67,7 +81,7 @@ public abstract class PlayerController : MonoBehaviour
     private void Start()
     {
         moveSpeed = walkSpeed;
-        Cursor.lockState = CursorLockMode.Locked;
+        //Cursor.lockState = CursorLockMode.Locked;
     }
 
     private void OnEnable()
@@ -80,8 +94,8 @@ public abstract class PlayerController : MonoBehaviour
         actions.Player.Attack.canceled += OnAttack;
         actions.Player.RightClick.performed += OnRightClick;
         actions.Player.RightClick.canceled += OnRightClick;
-        actions.Player.SpecialAttack.performed += SpecialAttack_Performed;
-        actions.Player.SpecialAttack.canceled += SpecialAttack_Performed;
+        actions.Player.SpecialAttack.performed += OnSpecialAttack;
+        actions.Player.SpecialAttack.canceled += OnSpecialAttack;
         actions.Player.Heal.performed += Heal_Performed;
         actions.Player.LockOn.performed += OnLockOn;
         actions.Player.WeaponChange.performed += OnWeaponChange;
@@ -89,8 +103,8 @@ public abstract class PlayerController : MonoBehaviour
 
     private void OnDisable()
     {
-        actions.Player.SpecialAttack.performed -= SpecialAttack_Performed;
-        actions.Player.SpecialAttack.canceled -= SpecialAttack_Performed;
+        actions.Player.SpecialAttack.performed -= OnSpecialAttack;
+        actions.Player.SpecialAttack.canceled -= OnSpecialAttack;
         actions.Player.Heal.performed -= Heal_Performed;
         actions.Player.WeaponChange.performed -= OnWeaponChange;
         actions.Player.LockOn.performed -= OnLockOn;
@@ -140,11 +154,17 @@ public abstract class PlayerController : MonoBehaviour
                     break;
                 case ControlMode.LockedOn:
                     // 플레이어가 락온된 상대를 바라보며 카메라를 기준으로 움직인
-                    if (lockonTarget != null)
+                    if (GameManager.Inst.Player_Stats.LockonTarget != null)
                     {
-                        relativeMoveDir = Quaternion.LookRotation(lockonTarget.position - transform.position, Vector3.up);
-                        transform.rotation = Quaternion.RotateTowards(transform.rotation, relativeMoveDir, turnSpeed);
+                        relativeMoveDir = Quaternion.LookRotation(GameManager.Inst.Player_Stats.LockonTarget.position - transform.position, Vector3.up);
+                        transform.parent.rotation = Quaternion.RotateTowards(transform.rotation, relativeMoveDir, turnSpeed);
                         moveDir = relativeMoveDir * moveDir;
+
+                        //Vector3 dir = mainCam.transform.position - transform.position;
+                        //dir = dir.normalized;
+                        //dir.y = 0f;
+
+                        //lockOnCamera.m_XAxis.Value = Vector3.Angle(dir, mainCam.transform.forward);
                     }
                     break;
             }
@@ -187,23 +207,16 @@ public abstract class PlayerController : MonoBehaviour
         anim.SetFloat("Speed", moveSpeed);
     }
 
-    protected virtual void OnAttack(InputAction.CallbackContext _)
-    {
-    }
-
-    protected virtual void OnRightClick(InputAction.CallbackContext _)
-    {
-    }
+    protected virtual void OnAttack(InputAction.CallbackContext _) { }
+    protected virtual void OnRightClick(InputAction.CallbackContext _) { }
+    protected virtual void OnSpecialAttack(InputAction.CallbackContext _) { }
 
     private void Heal_Performed(InputAction.CallbackContext _)
     {
         anim.SetTrigger("onHeal");
-        //GameManager.Inst.Player_Stats.Heal();
+        GameManager.Inst.Player_Stats.Heal();
     }
 
-    protected virtual void SpecialAttack_Performed(InputAction.CallbackContext _)
-    {
-    }
 
     private void OnLockOn(InputAction.CallbackContext _)
     {
@@ -212,28 +225,20 @@ public abstract class PlayerController : MonoBehaviour
 
     private void OnWeaponChange(InputAction.CallbackContext _)
     {
-        weaponIndex = Weapons.Sword;
         if (Keyboard.current.digit1Key.wasPressedThisFrame || Gamepad.current.leftShoulder.wasPressedThisFrame)
-        {// Sword
-            weaponIndex = Weapons.Sword;
+        {// Sword 로 변경 
+            playerWeapon.SwitchWeapon(Weapons.Sword);
         }
         else if (Keyboard.current.digit2Key.wasPressedThisFrame || Gamepad.current.rightShoulder.wasPressedThisFrame)
-        {// Arrow
-            weaponIndex = Weapons.Bow;
+        {// Archer 로 변경 
+            playerWeapon.SwitchWeapon(Weapons.Bow);
         }
-        playerWeapon.SwitchWeapon(weaponIndex);
-        RefreshAnimator(weaponIndex);
-
-        if(lockonTarget != null)
+        
+        if (GameManager.Inst.Player_Stats.LockonTarget != null)
         {
             LockOff();
             TargetLock();
         }
-    }
-
-    private void RefreshAnimator(Weapons newWeapon)
-    {
-        anim = transform.GetChild((int)newWeapon).GetComponent<Animator>();
     }
 
     private void OnJumpInput(InputAction.CallbackContext _)
@@ -256,13 +261,13 @@ public abstract class PlayerController : MonoBehaviour
         }
     }
 
-    public void TargetLock()
+    private void TargetLock()
     {
         Physics.OverlapSphereNonAlloc(transform.position, lockOnRadius, lockonCollider, LayerMask.GetMask("Enemy"));
 
         if (lockonCollider.Length > 0)
         {
-            if (lockonTarget == null)
+            if (GameManager.Inst.Player_Stats.LockonTarget == null)
             {
                 float closestDistance = float.MaxValue;
                 foreach (Collider coll in lockonCollider)
@@ -273,19 +278,28 @@ public abstract class PlayerController : MonoBehaviour
                     if (distanceSqr < closestDistance)
                     {// 거리가 더 짧을 경우 새로운 값 저장 
                         closestDistance = distanceSqr;
-                        lockonTarget = coll.transform;
+                        GameManager.Inst.Player_Stats.LockonTarget = coll.transform;
                     }
                 }
+                Transform target = GameManager.Inst.Player_Stats.LockonTarget;
+                transform.parent.rotation = Quaternion.LookRotation(target.position - transform.position);
+               //Test.position = target.position;
 
-                Transform lockOnEffectParent = lockonTarget.transform.Find("LockOnEffectPosition");
+                Transform lockOnEffectParent = target.transform.Find("LockOnEffectPosition");
                 lockOnEffect.transform.parent = lockOnEffectParent;
-                lockOnEffect_Ground.transform.parent = lockonTarget.transform;
+                lockOnEffect_Ground.transform.parent = target.transform;
 
                 lockOnEffect.transform.position = lockOnEffectParent.position + new Vector3(0f, 0f, 0.6f);
-                lockOnEffect_Ground.transform.position = lockonTarget.transform.position;
+                lockOnEffect_Ground.transform.position = target.transform.position;
 
                 lockOnEffect.SetActive(true);
                 lockOnEffect_Ground.SetActive(true);
+
+                mainCam.SetActive(false);
+                lockonFollowTarget.gameObject.SetActive(true);
+                lockonCam.LookAt = target;
+                lockonCam.gameObject.SetActive(true);
+
                 controlMode = ControlMode.LockedOn;
             }
             else
@@ -299,9 +313,9 @@ public abstract class PlayerController : MonoBehaviour
         }
     }
 
-    void LockOff()
+    private void LockOff()
     {
-        lockonTarget = null;
+        GameManager.Inst.Player_Stats.LockonTarget = null;
 
         lockOnEffect.transform.parent = null;
         lockOnEffect_Ground.transform.parent = null;
@@ -309,19 +323,21 @@ public abstract class PlayerController : MonoBehaviour
         lockOnEffect.SetActive(false);
         lockOnEffect_Ground.SetActive(false);
 
+        lockonFollowTarget.gameObject.SetActive(false);
+        lockonCam.LookAt = null;
+        lockonCam.gameObject.SetActive(false);
+        mainCam.transform.position = lockonCam.transform.position;
+        mainCam.SetActive(true);
+
         controlMode = ControlMode.Normal;
     }
 
 #if UNITY_EDITOR
     protected virtual void OnDrawGizmos()
     {
-        Handles.DrawWireDisc(transform.position, Vector3.up, lockOnRadius);
+        Handles.color = Color.green;
+        Handles.DrawWireDisc(transform.position, Vector3.up, lockOnRadius, 3.0f);
 
-        Handles.color = Color.red;
-        if (lockonTarget != null)
-        {
-            Handles.DrawLine(transform.position, lockonTarget.position, 3.0f);
-        }
     }
 #endif
 }
