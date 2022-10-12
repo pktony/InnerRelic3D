@@ -3,8 +3,6 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using Cinemachine;
 using System.Collections;
-using UnityEngine.AI;
-using UnityEngine.iOS;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -21,6 +19,7 @@ public abstract class PlayerController : MonoBehaviour
 
     PlayerState moveMode = PlayerState.Walk;
     protected ControlMode controlMode = ControlMode.Normal;
+    protected ControlMode prevControlMode;
 
     // ################### Move ######################3
     Vector3 moveDir = Vector3.zero;
@@ -44,7 +43,6 @@ public abstract class PlayerController : MonoBehaviour
     // ################ Target Lockon
     [SerializeField] float lockOnRadius = 20f;
     [SerializeField] GameObject lockOnEffect;
-    [SerializeField] GameObject lockOnEffect_Ground;
     private Collider[] lockonCollider = new Collider[5];
     private Transform lockonFollowTarget;
 
@@ -75,7 +73,6 @@ public abstract class PlayerController : MonoBehaviour
         gravity = Physics.gravity;
 
         lockOnEffect.SetActive(false);
-        lockOnEffect_Ground.SetActive(false);
     }
 
     private void Start()
@@ -143,21 +140,20 @@ public abstract class PlayerController : MonoBehaviour
             {
                 case ControlMode.Normal:
                     // 플레이어가 카메라를 기준으로 방향을 결정한다 
-                    transform.rotation = Quaternion.RotateTowards(transform.rotation, relativeMoveDir, turnSpeed);
+                    transform.parent.rotation = Quaternion.RotateTowards(transform.parent.rotation, relativeMoveDir, turnSpeed);
                     break;
                 case ControlMode.AimMode:
-                    // 플레이어가 카메라를 앞 방향으로 움직인다 
-                    Vector3 cameraForwardProjection = Vector3.ProjectOnPlane(Camera.main.transform.forward, Vector3.up);
-                    relativeMoveDir = Quaternion.LookRotation(cameraForwardProjection, Vector3.up);
-                    transform.rotation = Quaternion.RotateTowards(transform.rotation, relativeMoveDir, turnSpeed);
-                    moveDir = relativeMoveDir * moveDir;
+                    // 움직일 수 없고 회전만 가능하다 
+                    moveDir = Vector3.zero;
+                    transform.parent.rotation = Quaternion.RotateTowards(transform.parent.rotation,
+                        Quaternion.LookRotation( keyboardInputDirection), turnSpeed);
                     break;
                 case ControlMode.LockedOn:
                     // 플레이어가 락온된 상대를 바라보며 카메라를 기준으로 움직인
                     if (GameManager.Inst.Player_Stats.LockonTarget != null)
                     {
-                        relativeMoveDir = Quaternion.LookRotation(GameManager.Inst.Player_Stats.LockonTarget.position - transform.position, Vector3.up);
-                        transform.parent.rotation = Quaternion.RotateTowards(transform.rotation, relativeMoveDir, turnSpeed);
+                        relativeMoveDir = Quaternion.LookRotation(GameManager.Inst.Player_Stats.LockonTarget.position - transform.parent.position, Vector3.up);
+                        transform.parent.rotation = Quaternion.RotateTowards(transform.parent.rotation, relativeMoveDir, turnSpeed);
                         moveDir = relativeMoveDir * moveDir;
 
                         //Vector3 dir = mainCam.transform.position - transform.position;
@@ -282,18 +278,16 @@ public abstract class PlayerController : MonoBehaviour
                     }
                 }
                 Transform target = GameManager.Inst.Player_Stats.LockonTarget;
-                transform.parent.rotation = Quaternion.LookRotation(target.position - transform.position);
+                target.GetComponent<Enemy>().onDie = LockOff;
+                transform.parent.rotation = Quaternion.LookRotation(target.position - transform.parent.position);
+
                //Test.position = target.position;
 
                 Transform lockOnEffectParent = target.transform.Find("LockOnEffectPosition");
                 lockOnEffect.transform.parent = lockOnEffectParent;
-                lockOnEffect_Ground.transform.parent = target.transform;
-
                 lockOnEffect.transform.position = lockOnEffectParent.position + new Vector3(0f, 0f, 0.6f);
-                lockOnEffect_Ground.transform.position = target.transform.position;
 
                 lockOnEffect.SetActive(true);
-                lockOnEffect_Ground.SetActive(true);
 
                 mainCam.SetActive(false);
                 lockonFollowTarget.gameObject.SetActive(true);
@@ -316,12 +310,9 @@ public abstract class PlayerController : MonoBehaviour
     private void LockOff()
     {
         GameManager.Inst.Player_Stats.LockonTarget = null;
-
         lockOnEffect.transform.parent = null;
-        lockOnEffect_Ground.transform.parent = null;
 
         lockOnEffect.SetActive(false);
-        lockOnEffect_Ground.SetActive(false);
 
         lockonFollowTarget.gameObject.SetActive(false);
         lockonCam.LookAt = null;
