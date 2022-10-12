@@ -3,7 +3,11 @@ guid: 545788abcef164e20b5e6942b3d0565b
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - mainCam: {fileID: 6774241855042953463, guid: f51bf5b3562d44c0ea17ad093962f906, type: 3}
+  - lockonCam: {fileID: 4465953073802306371, guid: 7ca03eadf16f84c49853fa24d4a05f02, type: 3}
+  - lockOnEffect: {instanceID: 0}
+  - lockOnEffect_Ground: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

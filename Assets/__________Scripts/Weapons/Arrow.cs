@@ -30,7 +30,7 @@ public class Arrow : MonoBehaviour
     }
 
 
-    private void OnTriggerEnter(Collider collider)
+    protected virtual void OnTriggerEnter(Collider collider)
     {
         if (collider.CompareTag("Ground"))
         {
@@ -39,11 +39,11 @@ public class Arrow : MonoBehaviour
         else if (collider.CompareTag("Enemy"))
         {
             StartCoroutine(PlayParticles(hitParticle));
+            IBattle target = collider.GetComponent<IBattle>();
+            target?.TakeDamage(GameManager.Inst.Player_Stats.AttackPower);
         }
         else
             Destroy(this.gameObject);
-
-
     }
 
     protected virtual IEnumerator PlayParticles(ParticleSystem particle )
