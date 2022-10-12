@@ -13,4 +13,5 @@ MonoBehaviour:
   m_Name: 2_SpecialAttack_Archer
   m_EditorClassIdentifier: 
   coolTime: 5
-  skillParticles: []
+  skillParticles:
+  - {fileID: 5674798381456798783, guid: 261500901779947dca9d4d92b3954f4c, type: 3}

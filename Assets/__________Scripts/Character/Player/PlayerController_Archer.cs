@@ -7,7 +7,6 @@ using UnityEngine.InputSystem;
 public class PlayerController_Archer : PlayerController
 {
     private LineRenderer lineRend;
-    private ParticleSystem chargeParticle;
 
     private bool isAiming = false;
     private bool isCharging = false;
@@ -23,20 +22,21 @@ public class PlayerController_Archer : PlayerController
     private Vector3 currentVelocity;
     private List<Vector3> trajectoryPoints;
 
+    private WaitForSeconds chargeWaitSeconds;
     private WaitForSeconds bezierWaitSeconds;
     [SerializeField] float bezierInterval = 0.1f;
 
     public Vector3 CurrentVelocity => currentVelocity;
-    public Transform LockonTarget => lockonTarget;
 
     protected override void Awake()
     {
         base.Awake();
         trajectoryPoints = new();
-        lineRend = transform.GetChild(1).GetComponent<LineRenderer>();
+        lineRend = transform.GetComponent<LineRenderer>();
         lineRend.useWorldSpace = false;
         shootPositions = GetComponentInChildren<ShootPositions>();
 
+        chargeWaitSeconds = new WaitForSeconds(1.0f);
         bezierWaitSeconds = new WaitForSeconds(bezierInterval);
     }
 
@@ -49,16 +49,18 @@ public class PlayerController_Archer : PlayerController
     {
         if(context.performed)
         {
+            prevControlMode = controlMode;
+            controlMode = ControlMode.AimMode;
             isAiming = true;
             anim.SetBool("isAiming", isAiming);
-            lineRend.enabled = true;
+            //lineRend.enabled = true;
             StartCoroutine(CalculateTrajectory());
         }
         else if(context.canceled)
         {
+            controlMode = prevControlMode;
             isAiming = false;
             anim.SetBool("isAiming", isAiming);
-
             ShootArrows(1, arrowPrefab);
             trajectoryPoints.Clear();
             //lineRend.enabled = false;
@@ -99,32 +101,39 @@ public class PlayerController_Archer : PlayerController
         yield return null;
     }
 
-    protected override void SpecialAttack_Performed(InputAction.CallbackContext context)
+    protected override void OnSpecialAttack(InputAction.CallbackContext context)
     {
-        if (context.performed)
-        {// Charging 애니메이션까지는 자동으로 넘어간다 
-            isCharging = true;
-            anim.SetBool("isSpecialAttack", isCharging);
-            currentVelocity = MIN_INITIAL_VELOCITY_X * MIN_INITIAL_VELOCITY_X * transform.forward;
-            if (lockonTarget == null)
-                StartCoroutine(SpecialCharging(1, 5));
-            else
-                StartCoroutine(SpecialCharging(5, 30, 5));
-        }
-        else if (context.canceled)
-        {// 발사
-            isCharging = false;
-            anim.SetBool("isSpecialAttack", isCharging);
-
-            if (lockonTarget == null)
-            {// 락온 타겟이 없으면 전방에 일정 각도로 퍼지는 공격 
-                shootPositions.InitializeShootPosition(chargeCount);
-                ShootArrows(chargeCount, arrowSpecial_Prefab);
-                shootPositions.InitializeShootPosition(1);  // 원래대로 돌아오기
+        if (GameManager.Inst.Player_Stats.CoolTimes[(int)Skills.SpecialAttack_Archer].IsReadyToUse())
+        {
+            if (context.performed)
+            {// Charging 애니메이션까지는 자동으로 넘어간다
+                prevControlMode = controlMode;
+                controlMode = ControlMode.AimMode;
+                isCharging = true;
+                anim.SetBool("isSpecialAttack", isCharging);
+                currentVelocity = MIN_INITIAL_VELOCITY_X * MIN_INITIAL_VELOCITY_X * transform.forward;
+                if (GameManager.Inst.Player_Stats.LockonTarget == null) // 일반 특수 활 발사 
+                    StartCoroutine(SpecialCharging(1, 5));
+                else // 베지어 활 발사 
+                    StartCoroutine(SpecialCharging(5, 50, 10));
             }
-            else
-            {// 락온 타겟이 있으면 베지어 곡선을 따라가는 화살 발사 
-                StartCoroutine(ShootBezierArrows(chargeCount));
+            else if (context.canceled)
+            {// 발사
+                controlMode = prevControlMode;
+                isCharging = false;
+                anim.SetBool("isSpecialAttack", isCharging);
+
+                if (GameManager.Inst.Player_Stats.LockonTarget == null)
+                {// 락온 타겟이 없으면 전방에 일정 각도로 퍼지는 공격 
+                    shootPositions.InitializeShootPosition(chargeCount);
+                    ShootArrows(chargeCount, arrowSpecial_Prefab);
+                    shootPositions.InitializeShootPosition(1);  // 원래대로 돌아오기
+                }
+                else
+                {// 락온 타겟이 있으면 베지어 곡선을 따라가는 화살 발사 
+                    StartCoroutine(ShootBezierArrows(chargeCount));
+                }
+                GameManager.Inst.Player_Stats.CoolTimes[(int)Skills.SpecialAttack_Archer].ResetCoolTime();
             }
         }
     }
@@ -134,9 +143,10 @@ public class PlayerController_Archer : PlayerController
         chargeCount = minimumArrows;
         while(isCharging && chargeCount < maximumArrows)
         {
-            chargeCount++;
+            chargeCount += perCount;
+            Instantiate(GameManager.Inst.Player_Stats.Particles[2], transform.position + transform.up, Quaternion.identity);
             Debug.Log(chargeCount);
-            yield return new WaitForSeconds(1.0f);
+            yield return chargeWaitSeconds;
         }
     }
 
@@ -156,24 +166,24 @@ public class PlayerController_Archer : PlayerController
             obj.transform.position = firePosition[0].position;
             obj = Instantiate(arrowBezier_Prefab);
             obj.transform.position = firePosition[0].position;
-            arrowCount += 2;
+            arrowCount += 5;
             yield return bezierWaitSeconds;
         }
     }
 
-    protected override void OnRightClick(InputAction.CallbackContext obj)
+    protected override void OnRightClick(InputAction.CallbackContext _)
     {//     
-        anim.SetTrigger("moveAttack");
-        controller.Move(3.0f * transform.forward);
+        if(GameManager.Inst.Player_Stats.CoolTimes[(int)Skills.Dodge].IsReadyToUse())
+        {
+            anim.SetTrigger("onDodge");
+            GameManager.Inst.Player_Stats.CoolTimes[(int)Skills.Dodge].ResetCoolTime();
+            controller.detectCollisions = false;
+        }
     }
 
-    IEnumerator MoveBackward(float distance)
+    public void DectectCollision()
     {
-        while(true)
-        {
-            controller.Move(-distance * Time.deltaTime * transform.forward);
-            yield return null;
-        }
+        controller.detectCollisions = true;
     }
 
 

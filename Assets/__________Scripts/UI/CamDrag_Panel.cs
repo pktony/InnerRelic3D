@@ -18,7 +18,7 @@ public class CamDrag_Panel : MonoBehaviour, IDragHandler
 
     private void Awake()
     {
-        mainCam_Virtual = FindObjectOfType<CinemachineVirtualCamera>();
+        mainCam_Virtual = GameObject.Find("CMMainCam").GetComponent<CinemachineVirtualCamera>();
         orbitalTransposer = mainCam_Virtual.GetCinemachineComponent<CinemachineOrbitalTransposer>();
     }
 
