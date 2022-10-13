@@ -8,6 +8,7 @@ public class Arrow : MonoBehaviour
     private GameObject model;
     protected ParticleSystem hitParticle;
     protected ParticleSystem groundHitParticle;
+    protected Collider coll;
 
     protected virtual void Awake()
     {
@@ -16,6 +17,8 @@ public class Arrow : MonoBehaviour
         model = transform.GetChild(0).gameObject;
         hitParticle = transform.GetChild(1).GetComponent<ParticleSystem>();
         groundHitParticle = transform.GetChild(2).GetComponent<ParticleSystem>();
+
+        coll = GetComponent<Collider>();
     }
 
     protected virtual void Start()
@@ -49,6 +52,7 @@ public class Arrow : MonoBehaviour
     protected virtual IEnumerator PlayParticles(ParticleSystem particle )
     {
         model.SetActive(false);
+        coll.enabled = false;
         rigid.velocity = Vector3.zero;
         particle.Play();
         yield return new WaitForSeconds(particle.main.duration);
