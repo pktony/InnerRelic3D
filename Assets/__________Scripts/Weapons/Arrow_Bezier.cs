@@ -96,5 +96,7 @@ public class Arrow_Bezier : Arrow
         }
         else
             Destroy(this.gameObject);
+
+        coll.enabled = false;
     }
 }
