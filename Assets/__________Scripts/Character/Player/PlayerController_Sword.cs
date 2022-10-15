@@ -1,15 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.Animations;
-using UnityEditor.Rendering.LookDev;
+using Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class PlayerController_Sword : PlayerController
 {
     [SerializeField] private float dizzyTime = 3.0f;
-
-    GameObject invincibleParticles;
 
     // Special Attack
     private bool isSpinning = false;
@@ -17,30 +15,18 @@ public class PlayerController_Sword : PlayerController
     private float spinTimer = 0f;
     private WaitForSeconds spinWaitSeconds;
 
-    // Invincible Skill
-    private float invincibleDuration = 5f;
-    private WaitForSeconds invincibleWaitSeconds;
-
-
     private TrailRenderer[] swordTrails;
     public Transform swordParent;
 
     protected override void Awake()
     {
         base.Awake();
+
+        // Sword 캐릭터 스킬 관련 초기화 
         spinWaitSeconds = new WaitForSeconds(1.0f);
-        invincibleWaitSeconds = new WaitForSeconds(invincibleDuration);
+        
 
         swordTrails = swordParent.GetComponentsInChildren<TrailRenderer>();
-    }
-
-    private void Start()
-    {
-        invincibleParticles = Instantiate(GameManager.Inst.Player_Stats.skillDatas[(int)Skills.Defence].skillParticles[0]
-            , transform.parent);
-        invincibleParticles.SetActive(false);
-        ParticleSystem.MainModule mainParticle = invincibleParticles.GetComponent<ParticleSystem>().main;
-        mainParticle.duration = invincibleDuration;
     }
 
     protected override void OnAttack(InputAction.CallbackContext _)
@@ -51,22 +37,13 @@ public class PlayerController_Sword : PlayerController
 
     protected override void OnRightClick(InputAction.CallbackContext obj)
     {// 방어 스킬
-        if(GameManager.Inst.Player_Stats.CoolTimes[(int)Skills.Defence].IsReadyToUse())
+        if (GameManager.Inst.Player_Stats.CoolTimes[(int)Skills.Defence].IsReadyToUse())
         {
-            invincibleParticles.SetActive(true);
-            StartCoroutine(MakeInvinible());
+            StartCoroutine(FreezeControl(1.0f));
+            GameManager.Inst.Player_Stats.UseInvincibleSkill();
         }
     }
-
-    IEnumerator MakeInvinible()
-    {
-        anim.SetTrigger("onInvincible");
-        StartCoroutine(FreezeControl(1.0f));
-        controller.detectCollisions = false;
-        GameManager.Inst.Player_Stats.CoolTimes[(int)Skills.Defence].ResetCoolTime();
-        yield return invincibleWaitSeconds;
-        controller.detectCollisions = true;
-    }
+    
 
     protected override void OnSpecialAttack(InputAction.CallbackContext context)
     {
