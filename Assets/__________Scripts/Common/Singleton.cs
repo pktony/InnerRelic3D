@@ -2,11 +2,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class Singleton<T> : MonoBehaviour where T : Component
 {
     private static T instance = null;
+
+    public bool isDontDestroy = false;
 
     public static T Inst
     {
@@ -18,12 +19,14 @@ public class Singleton<T> : MonoBehaviour where T : Component
                 if (obj != null)
                 {
                     instance = obj;
+                    Debug.Log("Old Instance found");
                 }
                 else
-                {
+                { // 없으면 생성 
                     GameObject gameObject = new GameObject();
                     gameObject.name = $"{typeof(T).Name}";
                     instance = gameObject.AddComponent<T>();
+                    Debug.Log("New Instance Created");
                 }
             }
             return instance;
@@ -35,23 +38,16 @@ public class Singleton<T> : MonoBehaviour where T : Component
         if (instance == null)
         {
             T obj = this as T;
-            DontDestroyOnLoad(this.gameObject);
-            SceneManager.sceneLoaded += OnSceneLoad;
-
+            if (isDontDestroy)
+                DontDestroyOnLoad(this.gameObject);
         }
         else
         {
             if (instance != this)
             {
                 Destroy(this.gameObject);
+                Debug.Log("New instance Destroyed");
             }
         }
     }
-
-    private void OnSceneLoad(Scene arg0, LoadSceneMode arg1)
-    {
-        Initialize();
-    }
-
-    protected virtual void Initialize() { }
 }
