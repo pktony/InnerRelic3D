@@ -50,16 +50,13 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
             if (healthPoint > 0f)
             {
                 anim.SetTrigger("onHit");
-                Debug.Log($"Enemy HP : {healthPoint}");
+                //Debug.Log($"Enemy HP : {healthPoint}");
                 onHealthChange?.Invoke();
             }
             else
             {
                 if (!isDead)
-                {
-                    StartCoroutine(SlowMotionOnLastShot());
                     ChangeStatus(EnemyState.Die);
-                }
             }
         }
     }
@@ -69,6 +66,7 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
     public float AttackPower => attackPower;
 
     public Action onHealthChange { get; set; }
+    public Action onDie;
 
     private void Awake()
     {
@@ -192,11 +190,20 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
         transform.rotation = Quaternion.LookRotation(target.position - transform.position);
     }
 
-    IEnumerator SlowMotionOnLastShot()
+    public void InstantKill()
     {
-        Time.timeScale = 0.2f;
-        yield return new WaitForSeconds(1.0f);
-        Time.timeScale = 1.0f;
+        ChangeStatus(EnemyState.Die);
+    }
+
+    IEnumerator DieProcess()
+    {
+        isDead = true;
+        agent.isStopped = true;
+        anim.SetBool("isDead", isDead);
+        anim.SetTrigger("onDie");
+        onDie?.Invoke();
+        yield return new WaitForSeconds(2.0f);
+        Destroy(this.gameObject);
     }
 
     #region IBATTLE
@@ -246,10 +253,8 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
             case EnemyState.Knockback:
                 break;
             case EnemyState.Die:
-                isDead = true;
-                agent.isStopped = true;
-                anim.SetBool("isDead", isDead);
-                anim.SetTrigger("onDie");
+                if(!isDead)
+                    StartCoroutine(DieProcess());
                 break;
         }
 
