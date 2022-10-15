@@ -9,6 +9,8 @@ public class PlayerStats : MonoBehaviour, IHealth, IBattle
     Animator anim_Sword;
     Animator anim_Archer;
 
+    CharacterController controller;
+
     float healthPoint;
     float maxHealthPoint = 100f;
     [SerializeField] float attackPower = 10f;
@@ -26,16 +28,21 @@ public class PlayerStats : MonoBehaviour, IHealth, IBattle
     // [4] dodge
     private CoolTimeUIManager coolTimeManager;
 
-    private GameObject[] particles = new GameObject[3];
+    private GameObject[] particles = new GameObject[4];
     // [0] use
     // [1] tick
     // [2] charge
+    // [3] invincible
 
     // Heal Skill
     private float healAmount;
     private float healTickNum;
     private float healInterval;
     private WaitForSeconds healWaitSeconds;
+
+    // Invincible Skill
+    private float invincibleDuration = 5f;
+    private WaitForSeconds invincibleWaitSeconds;
 
     // Properties #################################
     public float HP
@@ -47,7 +54,7 @@ public class PlayerStats : MonoBehaviour, IHealth, IBattle
             {
                 if (value < healthPoint)
                 { // hit
-                    Debug.Log("hit");
+                    //Debug.Log("hit");
                     anim_Sword.SetTrigger("onHit");
                     anim_Archer.SetTrigger("onHit");
                 }
@@ -56,7 +63,7 @@ public class PlayerStats : MonoBehaviour, IHealth, IBattle
                     Instantiate(particles[1], transform.position + Vector3.up, Quaternion.identity);
                 }
                 healthPoint = (int)Mathf.Clamp(value, 0f, maxHealthPoint);
-                Debug.Log($"Player HP : {healthPoint}");
+                //Debug.Log($"Player HP : {healthPoint}");
                 onHealthChange?.Invoke();
             }
             else
@@ -90,16 +97,27 @@ public class PlayerStats : MonoBehaviour, IHealth, IBattle
         anim_Sword = transform.GetChild(0).GetComponent<Animator>();
         anim_Archer = transform.GetChild(1).GetComponent<Animator>();
 
+        controller = GetComponent<CharacterController>();
+
+        // Heal Skll --------------------------------------------------
         SkillData_Heal heal = skillDatas[0] as SkillData_Heal;
         healAmount = heal.healAmount;
         healTickNum = heal.healTickNum;
         healInterval = heal.healInterval;
         healWaitSeconds = new WaitForSeconds(healInterval);
-
         particles[0] = heal.skillParticles[0];
         particles[1] = heal.skillParticles[1];
-        particles[2] = skillDatas[2].skillParticles[0];
 
+        // Sword Invincible Skill -------------------------------------
+        particles[2] = skillDatas[2].skillParticles[0];
+        particles[3] = skillDatas[(int)Skills.Defence].skillParticles[0];
+        GameObject obj = Instantiate(particles[3], transform);
+        obj.SetActive(false);
+        ParticleSystem.MainModule mainParticle = obj.GetComponent<ParticleSystem>().main;
+        mainParticle.duration = invincibleDuration;
+        invincibleWaitSeconds = new WaitForSeconds(invincibleDuration);
+
+        // Cool Time Data Initialization -----------------------------
         coolTimeManager = FindObjectOfType<CoolTimeUIManager>();
         coolTimeManager.InitializeUIs();
         coolTimeDatas = new CoolTimeData[(int)Skills.SkillCount];
@@ -165,10 +183,29 @@ public class PlayerStats : MonoBehaviour, IHealth, IBattle
 
     public Vector3 GetTargetDirection()
     {
-        Vector3 dir = transform.position - LockonTarget.position;
-        dir = dir.normalized;
-        return dir;
+        if (LockonTarget != null)
+        {
+            Vector3 dir = transform.position - LockonTarget.position;
+            dir = dir.normalized;
+            return dir;
+        }
+        return Vector3.zero;
     }
 
+
+    public void UseInvincibleSkill()
+    {
+        particles[(int)Skills.Defence].SetActive(true);
+        StartCoroutine(MakeInvincible());
+    }
+
+    IEnumerator MakeInvincible()
+    {
+        anim_Sword.SetTrigger("onInvincible");
+        controller.detectCollisions = false;
+        GameManager.Inst.Player_Stats.CoolTimes[(int)Skills.Defence].ResetCoolTime();
+        yield return invincibleWaitSeconds;
+        controller.detectCollisions = true;
+    }
 }
 
