@@ -234,6 +234,7 @@ GameObject:
   - component: {fileID: -1436047666667724078}
   - component: {fileID: 7976062525910160417}
   - component: {fileID: 1325977749998247738}
+  - component: {fileID: 1435146043}
   m_Layer: 7
   m_Name: Karate Warrior
   m_TagString: Enemy
@@ -249,7 +250,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5772143122434580753}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.381681, y: 0, z: -4.2535124}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -284,7 +285,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   status: 0
-  detectedRange: 15
+  detectedRange: 100
   attackRange: 2.5
   timetoPatrol: 1
   attackCoolTime: 3
@@ -324,6 +325,19 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
+--- !u!135 &1435146043
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5772143122434580753}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.74
+  m_Center: {x: 0, y: 1.13, z: 0}
 --- !u!1001 &205724501111591964
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -40,8 +40,9 @@ public class PlayerController_Archer : PlayerController
         bezierWaitSeconds = new WaitForSeconds(bezierInterval);
     }
 
-    private void Start()
+    protected override void Start()
     {
+        base.Start();
         firePosition = shootPositions.InitializeShootPosition(1);
     }
 
