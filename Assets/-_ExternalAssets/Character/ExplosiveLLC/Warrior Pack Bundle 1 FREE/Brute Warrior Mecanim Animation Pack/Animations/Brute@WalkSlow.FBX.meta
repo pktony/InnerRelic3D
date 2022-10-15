@@ -1,7 +1,7 @@
 fileFormatVersion: 2
 guid: 30fa7d7448a4e8c42839ad4c2f36c6a1
 ModelImporter:
-  serializedVersion: 25
+  serializedVersion: 21202
   internalIDToNameTable:
   - first:
       1: 100000
@@ -392,7 +392,7 @@ ModelImporter:
     second: ImportLogs
   externalObjects: {}
   materials:
-    importMaterials: 0
+    materialImportMode: 0
     materialName: 0
     materialSearch: 1
     materialLocation: 0
@@ -401,14 +401,15 @@ ModelImporter:
     bakeSimulation: 0
     resampleCurves: 1
     optimizeGameObjects: 0
+    removeConstantScaleCurves: 0
     motionNodeName: Motion
     rigImportErrors: 
     rigImportWarnings: 
     animationImportErrors: 
     animationImportWarnings: "\nClip 'Take 001' has import animation warnings that
-      might lower retargeting quality:\nNote: Activate translation DOF on avatar to
-      improve retargeting quality.\n\t'B_Spine' has translation animation that will
-      be discarded.\n"
+      might lower retargeting quality:\nNote: Activate translation DOF on avatar
+      to improve retargeting quality.\n\t'B_Spine' has translation animation that
+      will be discarded.\n"
     animationRetargetingWarnings: 
     animationDoRetargetingWarnings: 0
     importAnimatedCustomProperties: 0
@@ -579,24 +580,32 @@ ModelImporter:
     meshCompression: 0
     addColliders: 0
     useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
     importVisibility: 0
     importBlendShapes: 0
     importCameras: 0
     importLights: 0
+    nodeNameCollisionStrategy: 0
+    fileIdsGeneration: 1
     swapUVChannels: 0
     generateSecondaryUV: 0
     useFileUnits: 1
     keepQuads: 0
     weldVertices: 0
+    bakeAxisConversion: 0
     preserveHierarchy: 0
     skinWeightsMode: 0
     maxBonesPerVertex: 4
     minBoneWeight: 0.001
+    optimizeBones: 1
     meshOptimizationFlags: 0
     indexFormat: 0
     secondaryUVAngleDistortion: 8
     secondaryUVAreaDistortion: 15.000001
     secondaryUVHardAngle: 88
+    secondaryUVMarginMethod: 0
+    secondaryUVMinLightmapResolution: 40
+    secondaryUVMinObjectScale: 1
     secondaryUVPackMargin: 4
     useFileScale: 0
   tangentSpace:
@@ -608,8 +617,7 @@ ModelImporter:
     blendShapeNormalImportMode: 2
     normalSmoothingSource: 0
   referencedClips: []
-  importAnimation: 1
-  copyAvatar: 1
+  importAnimation: 0
   humanDescription:
     serializedVersion: 3
     human:
@@ -1085,8 +1093,7 @@ ModelImporter:
     - name: B_Spine
       parentName: 
       position: {x: -0.16055633, y: -0.000289191, z: -0.00000000661752}
-      rotation: {x: 0.0000015348194, y: 0.000000074505785, z: -0.000000014901167,
-        w: -1}
+      rotation: {x: 0.0000015348194, y: 0.000000074505785, z: -0.000000014901167, w: -1}
       scale: {x: 0.9999998, y: 1, z: 1}
     - name: B_Spine1
       parentName: 
@@ -1196,8 +1203,7 @@ ModelImporter:
     - name: B_Head
       parentName: 
       position: {x: -0.15996124, y: -0.000000026375055, z: -5.684342e-16}
-      rotation: {x: 0.000000029802303, y: 0.000000029802301, z: 0.000000029802344,
-        w: 1}
+      rotation: {x: 0.000000029802303, y: 0.000000029802301, z: 0.000000029802344, w: 1}
       scale: {x: 0.9999999, y: 0.9999999, z: 0.9999998}
     - name: B_R_Clavicle
       parentName: 
@@ -1306,10 +1312,12 @@ ModelImporter:
     hasTranslationDoF: 0
     hasExtraRoot: 0
     skeletonHasParents: 0
-  lastHumanDescriptionAvatarSource: {fileID: 9000000, guid: e9332b82da4812a49916bf8fc87b2332,
-    type: 3}
+  lastHumanDescriptionAvatarSource: {fileID: 9000000, guid: e9332b82da4812a49916bf8fc87b2332, type: 3}
+  autoGenerateAvatarMappingIfUnspecified: 1
   animationType: 3
   humanoidOversampling: 1
+  avatarSetup: 2
+  addHumanoidExtraRootOnlyWhenUsingAvatar: 0
   additionalBone: 0
   userData: 
   assetBundleName: 
