@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using Cinemachine;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -14,10 +15,9 @@ public abstract class PlayerController : MonoBehaviour
     protected Animator anim;
     protected CharacterController controller;
 
-    public GameObject mainCam;
-    public CinemachineVirtualCamera lockonCam;
+    protected GameObject mainCam;
+    protected CinemachineVirtualCamera lockonCam;
 
-    PlayerState moveMode = PlayerState.Walk;
     protected ControlMode controlMode = ControlMode.Normal;
     protected ControlMode prevControlMode;
 
@@ -42,7 +42,7 @@ public abstract class PlayerController : MonoBehaviour
 
     // ################ Target Lockon
     [SerializeField] float lockOnRadius = 20f;
-    [SerializeField] GameObject lockOnEffect;
+    private GameObject lockOnEffect;
     private Collider[] lockonCollider = new Collider[5];
     private Transform lockonFollowTarget;
 
@@ -63,22 +63,36 @@ public abstract class PlayerController : MonoBehaviour
 
     protected virtual void Awake()
     {
+        // 컴포넌트 --------------------------
         actions = new();
         controller = GetComponentInParent<CharacterController>();
         anim = GetComponent<Animator>();
         lockonFollowTarget = transform.parent.GetChild(2);
 
-        playerWeapon = GetComponentInParent<PlayerWeapons>();
-
-        gravity = Physics.gravity;
-
+        // 락온 ----------------------------
+        lockOnEffect = transform.parent.GetChild(4).gameObject;
         lockOnEffect.SetActive(false);
+
+
+        // 카메라 --------------------------
+        mainCam = FindObjectOfType<MainCam>(true).gameObject;
+        CinemachineVirtualCamera cinemachine = mainCam.GetComponent<CinemachineVirtualCamera>();
+        cinemachine.Follow = this.transform.parent;
+        cinemachine.LookAt = this.transform.parent;
+        lockonCam = FindObjectOfType<LockonCam>(true).GetComponent<CinemachineVirtualCamera>();
+        lockonCam.Follow = transform.parent.GetChild(2);
+        mainCam.SetActive(false);
+        lockonCam.gameObject.SetActive(false);
+
+        // 기타 --------------------------
+        gravity = Physics.gravity;
+        playerWeapon = GetComponentInParent<PlayerWeapons>();
+        moveSpeed = walkSpeed;
     }
 
-    private void Start()
+    protected virtual void Start()
     {
-        moveSpeed = walkSpeed;
-        //Cursor.lockState = CursorLockMode.Locked;
+        //lockonCam.gameObject.SetActive(false);
     }
 
     private void OnEnable()
@@ -140,32 +154,28 @@ public abstract class PlayerController : MonoBehaviour
             {
                 case ControlMode.Normal:
                     // 플레이어가 카메라를 기준으로 방향을 결정한다 
-                    transform.parent.rotation = Quaternion.RotateTowards(transform.parent.rotation, relativeMoveDir, turnSpeed);
+                    transform.parent.rotation = Quaternion.RotateTowards(transform.parent.rotation,
+                        relativeMoveDir, turnSpeed);
                     break;
                 case ControlMode.AimMode:
                     // 움직일 수 없고 회전만 가능하다 
                     moveDir = Vector3.zero;
                     transform.parent.rotation = Quaternion.RotateTowards(transform.parent.rotation,
-                        Quaternion.LookRotation( keyboardInputDirection), turnSpeed);
+                        relativeMoveDir, turnSpeed);
                     break;
                 case ControlMode.LockedOn:
                     // 플레이어가 락온된 상대를 바라보며 카메라를 기준으로 움직인
                     if (GameManager.Inst.Player_Stats.LockonTarget != null)
                     {
-                        relativeMoveDir = Quaternion.LookRotation(GameManager.Inst.Player_Stats.LockonTarget.position - transform.parent.position, Vector3.up);
-                        transform.parent.rotation = Quaternion.RotateTowards(transform.parent.rotation, relativeMoveDir, turnSpeed);
+                        relativeMoveDir = Quaternion.LookRotation(
+                            GameManager.Inst.Player_Stats.LockonTarget.position - transform.parent.position, Vector3.up);
+                        transform.parent.rotation = Quaternion.RotateTowards(
+                            transform.parent.rotation, relativeMoveDir, turnSpeed);
                         moveDir = relativeMoveDir * moveDir;
-
-                        //Vector3 dir = mainCam.transform.position - transform.position;
-                        //dir = dir.normalized;
-                        //dir.y = 0f;
-
-                        //lockOnCamera.m_XAxis.Value = Vector3.Angle(dir, mainCam.transform.forward);
                     }
                     break;
             }
         }
-        
         controller.Move(moveSpeed * Time.fixedDeltaTime * moveDir);
     }
 
@@ -191,7 +201,7 @@ public abstract class PlayerController : MonoBehaviour
         }
         // ------------------------
 
-        if (controlMode == ControlMode.Normal)
+        if (controlMode != ControlMode.LockedOn)
         {
             keyboardInputDirection = Quaternion.Euler(0, Camera.main.transform.rotation.eulerAngles.y, 0) * keyboardInputDirection;
             if (keyboardInputDirection.sqrMagnitude > 0)
@@ -212,7 +222,6 @@ public abstract class PlayerController : MonoBehaviour
         anim.SetTrigger("onHeal");
         GameManager.Inst.Player_Stats.Heal();
     }
-
 
     private void OnLockOn(InputAction.CallbackContext _)
     {
@@ -278,7 +287,7 @@ public abstract class PlayerController : MonoBehaviour
                     }
                 }
                 Transform target = GameManager.Inst.Player_Stats.LockonTarget;
-                target.GetComponent<Enemy>().onDie = LockOff;
+                target.GetComponent<Enemy>().onDie += LockOff;
                 transform.parent.rotation = Quaternion.LookRotation(target.position - transform.parent.position);
 
                //Test.position = target.position;
@@ -310,7 +319,7 @@ public abstract class PlayerController : MonoBehaviour
     private void LockOff()
     {
         GameManager.Inst.Player_Stats.LockonTarget = null;
-        lockOnEffect.transform.parent = null;
+        lockOnEffect.transform.parent = this.transform;
 
         lockOnEffect.SetActive(false);
 
@@ -328,7 +337,6 @@ public abstract class PlayerController : MonoBehaviour
     {
         Handles.color = Color.green;
         Handles.DrawWireDisc(transform.position, Vector3.up, lockOnRadius, 3.0f);
-
     }
 #endif
 }
