@@ -4,14 +4,15 @@ using UnityEngine;
 
 public class PanelResizer : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    private RectTransform panelRect;
+
+    private void Awake()
     {
-        
+        panelRect = GetComponent<RectTransform>();   
     }
 
-    // Update is called once per frame
-    void Update()
+    //TEMP
+    private void Update()
     {
         
     }
