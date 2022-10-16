@@ -8,6 +8,8 @@ TagManager:
   - Enemy
   - FxTemporaire
   - Ground
+  - MasterVolume
+  - MusicVolume
   layers:
   - Default
   - TransparentFX

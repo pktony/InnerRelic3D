@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cd74457ad479113409d06660ad7bd6b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isDontDestroy: 1
+  isDontDestroy: 0
   roundTimer: []
   isRoundOver: 0
   isGameOver: 0
