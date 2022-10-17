@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class GameManager : Singleton<GameManager>
 {
@@ -14,15 +13,15 @@ public class GameManager : Singleton<GameManager>
 
     PlayerController_Sword swordController;
     Round_UI roundUI;
-
+    InfoPanel infoPanel;
     DollyController dollyController;
 
     private int currentRound = 0;
     private int totalRounds = 3;
     private int enemiesLeft;
     [HideInInspector] public float[] roundTimer;
-    [SerializeField] private bool isRoundOver = false;
-    [SerializeField] private bool isGameOver = false;
+    private bool isRoundOver = false;
+    private bool isGameOver = false;
 
     private int enemyPerRound = 5;
     [SerializeField] private float maxRoundTime = 180f;
@@ -45,13 +44,13 @@ public class GameManager : Singleton<GameManager>
             switch(currentRound)
             {
                 case 1:
-                    enemyPerRound = 5;
+                    enemyPerRound = 1;
                     break;
                 case 2:
-                    enemyPerRound = 10;
+                    enemyPerRound = 1;
                     break;
                 case 3:
-                    enemyPerRound = 15;
+                    enemyPerRound = 1;
                     break;
             }
         }
@@ -64,11 +63,16 @@ public class GameManager : Singleton<GameManager>
         set
         {
             if (value < enemiesLeft)
-            {
+            { // 줄었을 때
                 enemiesLeft = value;
                 if (enemiesLeft > 3)
                     onEnemyDie?.Invoke(enemiesLeft);
-                else if (EnemiesLeft > 0)
+                else if (enemiesLeft == 3)
+                {
+                    infoPanel.ShowPanel("3 Enemies Left. Keep Up");
+                    onEnemyDieRed?.Invoke(enemiesLeft);
+                }
+                else if (enemiesLeft > 0)
                     onEnemyDieRed?.Invoke(enemiesLeft);
                 else if (enemiesLeft == 0)
                 {
@@ -78,7 +82,7 @@ public class GameManager : Singleton<GameManager>
                 }
             }
             else
-            {
+            { // EnemiesLeft 초기화 시
                 enemiesLeft = value;
                 onEnemyDie?.Invoke(enemiesLeft);
             }
@@ -95,44 +99,22 @@ public class GameManager : Singleton<GameManager>
         swordController = FindObjectOfType<PlayerController_Sword>();
 
         roundUI = FindObjectOfType<Round_UI>();
-
-        //dollyController = FindObjectOfType<DollyController>();
-        //dollyController.onIntroEnd += RoundStart;
-
-        roundTimer = new float[totalRounds];
-        roundTimer[0] = maxRoundTime;
-        roundTimer[1] = maxRoundTime;
-        roundTimer[2] = maxRoundTime;
+        infoPanel = FindObjectOfType<InfoPanel>();
+        dollyController = FindObjectOfType<DollyController>();
+        dollyController.onIntroEnd += RoundStart;
 
         
-        //SceneManager.sceneLoaded += Initialize;
     }
     private void Start()
     {
-        //dollyController.InitializeIntroUIs();
-        currentRound = 0;
-        RoundStart();
-    }
-
-    private void Initialize(Scene arg0, LoadSceneMode arg1)
-    {
-        mainPlayer = FindObjectOfType<PlayerStats>();
-        archerController = FindObjectOfType<PlayerController_Archer>();
-        swordController = FindObjectOfType<PlayerController_Sword>();
-
-        roundUI = FindObjectOfType<Round_UI>();
-        roundUI.InitializeRoundUI();
-
-        //dollyController = FindObjectOfType<DollyController>();
-        //dollyController.onIntroEnd += RoundStart;
-
+        dollyController.InitializeIntroUIs();
         roundTimer = new float[totalRounds];
         roundTimer[0] = maxRoundTime;
+        onTimerActivate[0]?.Invoke(0, roundTimer[0]);
         roundTimer[1] = maxRoundTime;
+        onTimerActivate[1]?.Invoke(1, roundTimer[1]);
         roundTimer[2] = maxRoundTime;
-
-        currentRound = 0;
-        RoundStart();
+        onTimerActivate[2]?.Invoke(2, roundTimer[2]);
     }
 
     public void RoundStart()
@@ -165,6 +147,7 @@ public class GameManager : Singleton<GameManager>
         {
             isRoundOver = true;
             isGameOver = true;
+            roundTimer[currentRound - 1] = 0f;
             onGameover?.Invoke();
         }
     }
