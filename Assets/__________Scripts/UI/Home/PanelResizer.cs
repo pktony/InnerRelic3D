@@ -16,8 +16,11 @@ public class PanelResizer : MonoBehaviour
     private RectTransform panelRect;
     private Vector2 buttonsSize;
     private Vector2 settingSize;
+    private Vector2 leaderBoardSize;
 
-    private const float WINDOWSIZE_ERROR = 50f;
+    private const float WINDOWSIZE_ERROR = 30f;
+    private float speed_X = 500f;
+    private float speed_Y = 1500f;
 
     private void Awake()
     {
@@ -25,6 +28,7 @@ public class PanelResizer : MonoBehaviour
 
         buttonsSize = transform.parent.GetChild(1).GetComponent<RectTransform>().sizeDelta;
         settingSize = transform.parent.GetChild(2).GetChild(0).GetComponent<RectTransform>().sizeDelta;
+        leaderBoardSize = transform.parent.GetChild(2).GetChild(1).GetComponent<RectTransform>().sizeDelta;
     }
 
     public void SetWindowSize(UIWindow windowType)
@@ -38,6 +42,10 @@ public class PanelResizer : MonoBehaviour
             case UIWindow.Setting:
                 StartCoroutine(AdjustWindowSize_X(settingSize));
                 StartCoroutine(AdjustWindowSize_Y(settingSize));
+                break;
+            case UIWindow.LeaderBoard:
+                StartCoroutine(AdjustWindowSize_X(leaderBoardSize));
+                StartCoroutine(AdjustWindowSize_Y(leaderBoardSize));
                 break;
             default:
                 break;  
@@ -59,13 +67,11 @@ public class PanelResizer : MonoBehaviour
             multiplier_x = 1;
         }
 
-        while (Mathf.Abs(panelRect.sizeDelta.x - goalSize.x) > WINDOWSIZE_ERROR)
+        while (Mathf.Abs(panelRect.sizeDelta.x - goalSize.x) > speed_X * Time.fixedDeltaTime)
         {
-            panelRect.sizeDelta += 500f * Time.deltaTime * multiplier_x * Vector2.right;
+            panelRect.sizeDelta += speed_X * Time.fixedDeltaTime * multiplier_x * Vector2.right;
             yield return null;
         }
-        Debug.Log("X done");
-        //StartCoroutine(AdjustWindowSize_Y(goalSize));
     }
 
 
@@ -82,11 +88,10 @@ public class PanelResizer : MonoBehaviour
             multiplier_y = 1;
         }
 
-        while (Mathf.Abs(panelRect.sizeDelta.y - goalSize.y) > WINDOWSIZE_ERROR)
+        while (Mathf.Abs(panelRect.sizeDelta.y - goalSize.y) > speed_Y * Time.fixedDeltaTime)
         {
-            panelRect.sizeDelta += 1500f * Time.deltaTime * multiplier_y * Vector2.up;
+            panelRect.sizeDelta += speed_Y * Time.fixedDeltaTime * multiplier_y * Vector2.up;
             yield return null;
         }
-        Debug.Log("Y Done");
     }
 }
