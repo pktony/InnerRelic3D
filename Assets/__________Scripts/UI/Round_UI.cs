@@ -18,7 +18,8 @@ public class Round_UI : MonoBehaviour
     Animator roundAnimator;
     Animator populationAnimator;
 
-    CanvasGroup buttonGroup;
+    CanvasGroup roundButtonGroup;
+    CanvasGroup gameOverGroup;
 
     [SerializeField] private string startInstruction = "KILL ALL ENEMIES IN TIME";
     [SerializeField] private string roundEndInstrction = "VICTORY !";
@@ -42,7 +43,8 @@ public class Round_UI : MonoBehaviour
         //timerTexts[1].text = "Test2";
         //timerTexts[2].text = "Test3";
 
-        buttonGroup = transform.GetChild(7).GetComponent<CanvasGroup>();
+        roundButtonGroup = transform.GetChild(7).GetComponent<CanvasGroup>();
+        gameOverGroup = transform.GetChild(9).GetComponent<CanvasGroup>();
     }
 
     private void Start()
@@ -143,6 +145,9 @@ public class Round_UI : MonoBehaviour
             gameoverText.color = color;
             yield return null;
         }
+        gameOverGroup.alpha = 1.0f;
+        gameOverGroup.interactable = true;
+        gameOverGroup.blocksRaycasts = true;
     }
 
     IEnumerator ShowVictory()
@@ -162,12 +167,15 @@ public class Round_UI : MonoBehaviour
         if (GameManager.Inst.CurrentRound != 3)
         {// 다음 라운드 준비
             onVictory?.Invoke();
-            buttonGroup.alpha = 1.0f;
-            buttonGroup.blocksRaycasts = true;
+            roundButtonGroup.alpha = 1.0f;
+            roundButtonGroup.interactable = true;
+            roundButtonGroup.blocksRaycasts = true;
         }
         else
         {// 게임 끝 
-
+            gameOverGroup.alpha = 1.0f;
+            gameOverGroup.interactable = true;
+            gameOverGroup.blocksRaycasts = true;
         }
     }
 }

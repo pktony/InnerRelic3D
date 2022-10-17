@@ -32,6 +32,7 @@ public class Button_Base : MonoBehaviour, IPointerEnterHandler, IPointerUpHandle
     public virtual void OnPointerUp(PointerEventData eventData)
     {
         buttonGroup.alpha = 0f;
+        buttonGroup.interactable = false;
         buttonGroup.blocksRaycasts = false;
     }
 }
