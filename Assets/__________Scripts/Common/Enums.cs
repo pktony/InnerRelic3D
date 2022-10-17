@@ -39,3 +39,9 @@ public enum EnemyState : byte
     Knockback,
     Die,
 }
+
+public enum UIWindow : byte
+{
+    Home = 0,
+    Setting,
+}
