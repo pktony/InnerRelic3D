@@ -44,4 +44,5 @@ public enum UIWindow : byte
 {
     Home = 0,
     Setting,
+    LeaderBoard
 }
