@@ -20,6 +20,7 @@ public class SettingButton : MonoBehaviour, IPointerClickHandler
         contentGroup.interactable = true;
         contentGroup.blocksRaycasts = true;
         homeButtons.HideButtons();
+        SettingManager.Inst.Panel.SetWindowSize(UIWindow.Setting);
     }
 
 }
