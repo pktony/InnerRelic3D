@@ -6,16 +6,13 @@ using UnityEngine;
 public class GameManager : Singleton<GameManager>
 {
     PlayerStats mainPlayer;
-    public PlayerStats Player_Stats => mainPlayer;
-
     PlayerController_Archer archerController;
-    public PlayerController_Archer ArcherController => archerController;
-
     PlayerController_Sword swordController;
     Round_UI roundUI;
     InfoPanel infoPanel;
     DollyController dollyController;
 
+    //  변수 --------------------------------------------------------------------
     private int currentRound = 0;
     private int totalRounds = 3;
     private int enemiesLeft;
@@ -26,6 +23,7 @@ public class GameManager : Singleton<GameManager>
     private int enemyPerRound = 5;
     [SerializeField] private float maxRoundTime = 180f;
 
+    // 델리게이트 -----------------------------------------------------------------
     public Action<int, int> onRoundStart;
     public Action startSpawn;
     public Action<int> onEnemyDie;
@@ -34,6 +32,9 @@ public class GameManager : Singleton<GameManager>
     public Action onRoundOver;
     public Action onGameover;
 
+    // 프로퍼티 ------------------------------------------------------------------
+    public PlayerStats Player_Stats => mainPlayer;
+    public PlayerController_Archer ArcherController => archerController;
     public bool IsRoundOver => isRoundOver;
     public int CurrentRound
     {
@@ -102,9 +103,8 @@ public class GameManager : Singleton<GameManager>
         infoPanel = FindObjectOfType<InfoPanel>();
         dollyController = FindObjectOfType<DollyController>();
         dollyController.onIntroEnd += RoundStart;
-
-        
     }
+
     private void Start()
     {
         dollyController.InitializeIntroUIs();

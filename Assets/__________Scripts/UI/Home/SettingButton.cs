@@ -10,7 +10,7 @@ public class SettingButton : MonoBehaviour, IPointerClickHandler
 
     private void Awake()
     {
-        contentGroup = transform.parent.parent.GetChild(2).GetComponent<CanvasGroup>();
+        contentGroup = transform.parent.parent.GetChild(2).GetChild(0).GetComponent<CanvasGroup>();
         homeButtons = GetComponentInParent<HomeButtons>();
     }
 
