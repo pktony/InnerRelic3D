@@ -6,7 +6,10 @@ using UnityEngine.UI;
 
 public class SettingMain : MonoBehaviour, IPointerClickHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
-    Image volumeBar;
+    Image volumeBar;    // EventSystem용 Image
+    Image masterVolumeBar;
+    Image musicVolumeBar;
+
     HomeButtons homeButtons;
 
     GraphicRaycaster raycaster;
@@ -56,6 +59,17 @@ public class SettingMain : MonoBehaviour, IPointerClickHandler, IBeginDragHandle
     {
         homeButtons = GetComponentInParent<HomeButtons>();
         raycaster = GetComponentInParent<GraphicRaycaster>();
+
+        Transform barParent = transform.GetChild(0);
+        masterVolumeBar = barParent.GetChild(1).GetChild(0).GetChild(0).GetComponent<Image>();
+        musicVolumeBar = barParent.GetChild(2).GetChild(0).GetChild(0).GetComponent<Image>();
+    }
+
+    private void Start()
+    {// 처음 시작 초기화 
+        SettingData data = SettingManager.Inst.LoadSettingValues();
+        masterVolumeBar.fillAmount = data.masterVolume;
+        musicVolumeBar.fillAmount = data.musicVolume;
     }
 
     private void CheckImage(PointerEventData eventData)
@@ -65,9 +79,11 @@ public class SettingMain : MonoBehaviour, IPointerClickHandler, IBeginDragHandle
             if (!volumeBar.CompareTag("MasterVolume") || !volumeBar.CompareTag("MusicVolume"))
             {
                 if(volumeBar.TryGetComponent<BackButton>(out BackButton exit))
-                {
+                {// Home으로 나가기 
                     exit.HideSettings();
                     homeButtons.ShowButtons();
+                    SettingManager.Inst.Panel.SetWindowSize(UIWindow.Home);
+                    SettingManager.Inst.SaveSettingValues();
                     return;
                 }
             }
