@@ -79,8 +79,13 @@ public class GameManager : Singleton<GameManager>
                 else if (enemiesLeft == 0)
                 {
                     isRoundOver = true;
-                    StartCoroutine(SlowMotion());
+                    //StartCoroutine(SlowMotion());
                     onRoundOver?.Invoke(currentRound);
+                    if (currentRound == totalRounds)
+                    {
+                        SettingManager.Inst.CheckHighScores(roundTimer[totalRounds - 1]);
+                        uiManager.LeaderBoard_InGame.RefreshLeaderBoard();
+                    }
                 }
             }
             else

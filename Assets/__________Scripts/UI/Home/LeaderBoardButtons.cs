@@ -5,21 +5,26 @@ using UnityEngine.EventSystems;
 
 public class LeaderBoardButtons : MonoBehaviour, IPointerClickHandler
 {
-    CanvasGroup boardGroup;
+    UIManager uiManager;
+    SettingManager settingManager;
+
     HomeButtons homeButtons;
 
     private void Awake()
     {
-        boardGroup = transform.parent.parent.GetChild(2).GetChild(1).GetComponent<CanvasGroup>();
         homeButtons = FindObjectOfType<HomeButtons>();
+    }
+
+    private void Start()
+    {
+        uiManager = UIManager.Inst;
+        settingManager = SettingManager.Inst;
     }
 
     public void OnPointerClick(PointerEventData _)
     {
-        boardGroup.alpha = 1f;
-        boardGroup.interactable = true;
-        boardGroup.blocksRaycasts = true;
+        uiManager.LeaderBoard_Home.ShowLeaderBoard();
         homeButtons.HideButtons();
-        SettingManager.Inst.Panel.SetWindowSize(UIWindow.LeaderBoard);
+        settingManager.Panel.SetWindowSize(UIWindow.LeaderBoard);
     }
 }

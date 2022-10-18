@@ -13,26 +13,38 @@ using UnityEngine.SceneManagement;
 public class UIManager : Singleton<UIManager>
 {
     GameManager gameManager;
+    // 홈 화면 ------------------------------------------------------------------
+    LeaderBoard_Home leaderBoard_Home;
+    SettingMain settingMain;
+    HomeButtons homeButtons;
+
+    // 인게임 -------------------------------------------------------------------
     int totalRounds;
 
     TextMeshProUGUI instructionText;
     TextMeshProUGUI[] timerTexts;
-    TextMeshProUGUI gameoverText;
     TextMeshProUGUI maxEnemyText;
 
     TextMeshProUGUI populationText;
     Animator populationAnimator;
-    CanvasGroup gameOverGroup;
 
     Round_UI roundUI;
     InfoPanel infoPanel;
     TimerController timerController;
+    LeaderBoard_InGame leaderBoard_InGame;
+    GameoverUI gameoverUI;
 
     [SerializeField] private string startInstruction = "KILL ALL ENEMIES IN TIME";
     [SerializeField] private string roundEndInstrction = "VICTORY !";
 
     // 프로퍼티 -----------------------------------------------------------------
+    public LeaderBoard_Home LeaderBoard_Home => leaderBoard_Home;
+    public SettingMain SettingMain => settingMain;
+    public HomeButtons HomeButtons => homeButtons;
     public InfoPanel InfoPanel => infoPanel;
+    // - 인게임 
+    public LeaderBoard_InGame LeaderBoard_InGame => leaderBoard_InGame;
+    public GameoverUI GameoverUI => gameoverUI;
 
     // 델리게이트 ----------------------------------------------------------------
     public Action<int, float>[] onTimerActivate;
@@ -48,6 +60,9 @@ public class UIManager : Singleton<UIManager>
     {
         if(arg0 == SceneManager.GetSceneByName("Home"))
         {
+            leaderBoard_Home = FindObjectOfType<LeaderBoard_Home>();
+            settingMain = FindObjectOfType<SettingMain>();
+            homeButtons = FindObjectOfType<HomeButtons>();
         }
         else if(arg0 == SceneManager.GetSceneByName("Stage"))
         {
@@ -56,6 +71,7 @@ public class UIManager : Singleton<UIManager>
 
             roundUI = FindObjectOfType<Round_UI>();
             infoPanel = FindObjectOfType<InfoPanel>();
+            leaderBoard_InGame = FindObjectOfType<LeaderBoard_InGame>();
             onTimerActivate = new Action<int, float>[totalRounds];
             for (int i = 0; i < totalRounds; i++)
                 onTimerActivate[i] += RefreshTimer;
@@ -67,13 +83,12 @@ public class UIManager : Singleton<UIManager>
             //timerTexts[1].text = "Test2";
             //timerTexts[2].text = "Test3";
 
-            instructionText = roundUI.transform.GetChild(6).GetComponent<TextMeshProUGUI>();
+            instructionText = roundUI.transform.GetChild(5).GetComponent<TextMeshProUGUI>();
             populationText = roundUI.transform.GetChild(2).GetComponent<TextMeshProUGUI>();
             populationAnimator = populationText.GetComponent<Animator>();
             maxEnemyText = roundUI.transform.GetChild(3).GetComponent<TextMeshProUGUI>();
 
-            gameoverText = roundUI.transform.GetChild(5).GetComponent<TextMeshProUGUI>();
-            gameOverGroup = roundUI.transform.GetChild(9).GetComponent<CanvasGroup>();
+            gameoverUI = FindObjectOfType<GameoverUI>();
 
             gameManager.onRoundStart += OnGameStart;
             gameManager.onEnemyDie += RefreshPopulationText;
@@ -106,7 +121,7 @@ public class UIManager : Singleton<UIManager>
         yield return new WaitForSeconds(1.0f);
 
         //Show Round Number
-        roundUI.RefreshRound();
+        roundUI.RefreshRoundUI();
         RefreshPopulationText(enemies);
 
         while (color.a > 0f)
@@ -150,21 +165,7 @@ public class UIManager : Singleton<UIManager>
 
     private void OnGameOver()
     {// 게임오버 ui 표시
-        StartCoroutine(ShowGameoverUI());
-    }
-
-    IEnumerator ShowGameoverUI()
-    {// 게임 오버 표시 
-        Color color = gameoverText.color;
-        while (color.a <= 1f)
-        {
-            color.a += Time.deltaTime;
-            gameoverText.color = color;
-            yield return null;
-        }
-        gameOverGroup.alpha = 1.0f;
-        gameOverGroup.interactable = true;
-        gameOverGroup.blocksRaycasts = true;
+        StartCoroutine(gameoverUI.ShowGameoverText());
     }
 
     IEnumerator ShowVictory(int currentRound)
@@ -184,13 +185,11 @@ public class UIManager : Singleton<UIManager>
         if (currentRound != 3)
         {// 다음 라운드 준비
             timerController.ActivateNextTimer(currentRound);
-            roundUI.ShowRoundUI();
+            roundUI.ShowVictoryUI();
         }
         else
         {// 게임 끝 
-            gameOverGroup.alpha = 1.0f;
-            gameOverGroup.interactable = true;
-            gameOverGroup.blocksRaycasts = true;
+            gameoverUI.ShowGameoverButtons();
         }
     }
 }

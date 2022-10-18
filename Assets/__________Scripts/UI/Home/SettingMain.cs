@@ -6,11 +6,11 @@ using UnityEngine.UI;
 
 public class SettingMain : MonoBehaviour, IPointerClickHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
+    CanvasGroup group;
+
     Image volumeBar;    // EventSystem용 Image
     Image masterVolumeBar;
     Image musicVolumeBar;
-
-    HomeButtons homeButtons;
 
     GraphicRaycaster raycaster;
     List<RaycastResult> rayResults = new(3);
@@ -21,12 +21,11 @@ public class SettingMain : MonoBehaviour, IPointerClickHandler, IBeginDragHandle
 
     private void Awake()
     {
-        homeButtons = GetComponentInParent<HomeButtons>();
+        group = GetComponent<CanvasGroup>();
         raycaster = GetComponentInParent<GraphicRaycaster>();
 
-        Transform barParent = transform.GetChild(0);
-        masterVolumeBar = barParent.GetChild(1).GetChild(0).GetChild(0).GetComponent<Image>();
-        musicVolumeBar = barParent.GetChild(2).GetChild(0).GetChild(0).GetComponent<Image>();
+        masterVolumeBar = transform.GetChild(1).GetChild(0).GetChild(0).GetComponent<Image>();
+        musicVolumeBar = transform.GetChild(2).GetChild(0).GetChild(0).GetComponent<Image>();
     }
 
     private void Start()
@@ -40,17 +39,6 @@ public class SettingMain : MonoBehaviour, IPointerClickHandler, IBeginDragHandle
     {
         if (rayResults[0].gameObject.TryGetComponent<Image>(out volumeBar))
         {// Image 컴포넌트 찾기
-            if (!volumeBar.CompareTag("MasterVolume") || !volumeBar.CompareTag("MusicVolume"))
-            {
-                if(volumeBar.TryGetComponent<BackButton>(out BackButton exit))
-                {// Home으로 나가기 
-                    exit.HideSettings();
-                    homeButtons.ShowButtons();
-                    SettingManager.Inst.Panel.SetWindowSize(UIWindow.Home);
-                    SettingManager.Inst.SaveSettingValues();
-                    return;
-                }
-            }
             if (volumeBar.TryGetComponent<RectTransform>(out RectTransform rect))
             {// 왼쪽 끝을 찾기 위한 RectTransform
                 imageWidth = rect.sizeDelta.x;
@@ -70,6 +58,20 @@ public class SettingMain : MonoBehaviour, IPointerClickHandler, IBeginDragHandle
         {
             SettingManager.Inst.MusicVolume = volumeBar.fillAmount;
         }
+    }
+
+    public void ShowSetting()
+    {
+        group.alpha = 1.0f;
+        group.interactable = true;
+        group.blocksRaycasts = true;
+    }
+
+    public void HideSetting()
+    {
+        group.alpha = 0f;
+        group.interactable = false;
+        group.blocksRaycasts = false;
     }
 
     public void OnBeginDrag(PointerEventData eventData)
