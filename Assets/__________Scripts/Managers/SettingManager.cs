@@ -40,7 +40,8 @@ public class SettingManager : Singleton<SettingManager>
     // Rank
     private string rankSaveFileName = "RankData.json";
     private RankData rankData;
-    private LeaderBoard board;
+    private LeaderBoard_Home board_Home;
+    private LeaderBoard_InGame board_InGame;
     private const int rankCount = 6;
     private float[] scores;
 
@@ -60,11 +61,16 @@ public class SettingManager : Singleton<SettingManager>
         rankData = LoadRankDatas();
         scores = rankData.scores;
 
-        if (arg0.buildIndex == 0)
+        if (arg0 == SceneManager.GetSceneByName("Home"))
         {
             panel = FindObjectOfType<PanelResizer>();
-            board = FindObjectOfType<LeaderBoard>();
-            board.RefreshLeaderBoard();
+            board_Home = FindObjectOfType<LeaderBoard_Home>();
+            board_Home.RefreshLeaderBoard();
+        }
+        else if(arg0 == SceneManager.GetSceneByName("Stage"))
+        {
+            board_InGame = FindObjectOfType<LeaderBoard_InGame>();
+            board_InGame.RefreshLeaderBoard();
         }
     }
 
@@ -118,7 +124,7 @@ public class SettingManager : Singleton<SettingManager>
 
         // 파일 생성 
         File.WriteAllText(filePath, ToJsonData);
-        print(rankData);
+        print("랭킹 저장 완료");
     }
 
     public RankData LoadRankDatas()
@@ -133,8 +139,10 @@ public class SettingManager : Singleton<SettingManager>
         }
         else
         {
-            print("랭킹 불러오기 실패");
-            return null;
+            rankData.scores = scores;
+            SaveGameRank();
+            print("랭킹 기록 없음 ");
+            return rankData;
         }
     }
 
@@ -152,6 +160,7 @@ public class SettingManager : Singleton<SettingManager>
                 }
                 scores[i] = newScore;
                 SaveGameRank();
+                UIManager.Inst.InfoPanel.ShowPanel("New High Score !");
                 break;
             }
             else

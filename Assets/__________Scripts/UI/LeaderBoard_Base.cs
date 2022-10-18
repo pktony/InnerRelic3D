@@ -2,12 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LeaderBoard : MonoBehaviour
+public class LeaderBoard_Base : MonoBehaviour
 {
+    protected CanvasGroup group;
+
     LeaderBoardLine[] ranks;
     private const int rankCount = 6;
 
-    private void Awake()
+    protected virtual void Awake()
     {
         ranks = new LeaderBoardLine[rankCount];
         for (int i = 0; i < rankCount; i++)
@@ -22,5 +24,19 @@ public class LeaderBoard : MonoBehaviour
         {
             ranks[i].SetNewRank(SettingManager.Inst.Scores[i]);
         }
+    }
+
+    public void ShowLeaderBoard()
+    {
+        group.alpha = 1f;
+        group.interactable = true;
+        group.blocksRaycasts = true;
+    }
+
+    public void HideLeaderBoard()
+    {
+        group.alpha = 0f;
+        group.interactable = false;
+        group.blocksRaycasts = false;
     }
 }

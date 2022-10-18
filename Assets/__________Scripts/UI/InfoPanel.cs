@@ -19,10 +19,11 @@ public class InfoPanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, 
     private float showSpeed = 5f;
     private float swipeSensitivity = 2f;
 
-    // Flags --------------------------------------------------------------- 
+    // Flags ------------------------------------------------------------------
     private bool isInterrupted = false;
     private bool isShowing = false;
 
+    // Constants --------------------------------------------------------------
     private Vector2 dragOffset;
     private const float ERROR_CORRECTION_NUM = 1.5f;
 
@@ -39,7 +40,6 @@ public class InfoPanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, 
         initialPos = rect.anchoredPosition;
         destinationPos = initialPos + Vector2.up * panelHeight;
     }
-
 
     public void ShowPanel(string notificationText)
     {
@@ -84,13 +84,13 @@ public class InfoPanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, 
         Debug.Log("숨기기 끝");
     }
 
-    public void OnPointerDown(PointerEventData eventData)
+    public void OnPointerDown(PointerEventData _)
     {
         isInterrupted = true;
         Debug.Log("Interrupted");
     }
 
-    public void OnPointerUp(PointerEventData eventData)
+    public void OnPointerUp(PointerEventData _)
     {
         isInterrupted = false;
         StartCoroutine(HidePanel(rect.anchoredPosition, 2.0f));
