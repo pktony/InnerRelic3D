@@ -5,11 +5,10 @@ using UnityEngine;
 
 public class TimerController : MonoBehaviour
 {
-    Round_UI round_UI;
-    RectTransform[] timers;
-    int currentRound;
+    GameManager gameManager;
 
-    private readonly Vector2 initialPos = new Vector2(0, -25);
+    RectTransform[] timers;
+
     private readonly Vector2 movePos = new Vector2(-650f, -135f);
 
     private void Awake()
@@ -19,17 +18,18 @@ public class TimerController : MonoBehaviour
         {
             timers[i] = transform.GetChild(i).GetComponent<RectTransform>();
         }
-
-        round_UI = GetComponentInParent<Round_UI>();
-        round_UI.onVictory += ActivateNextTimer;
     }
 
-    IEnumerator TimerAnimation()
+    private void Start()
     {
-        currentRound = GameManager.Inst.CurrentRound;
+        gameManager = GameManager.Inst;
+    }
+
+    IEnumerator TimerAnimation(int currentRound)
+    {
         float timer = 0f;
         while(timer < 3.0f)
-        {
+        {// 타이머 옆으로 잠시 치우기 
             timer += Time.deltaTime;
             timers[currentRound - 1].anchoredPosition =
                 Vector3.Slerp(timers[currentRound - 1].anchoredPosition,
@@ -38,27 +38,27 @@ public class TimerController : MonoBehaviour
             yield return null;
         }
 
-        while (GameManager.Inst.roundTimer[currentRound - 1] > 0f)
+        while (gameManager.RoundTimer[currentRound - 1] > 0f)
         {
             timer += Time.deltaTime;
-            GameManager.Inst.DecreaseTimer(50f);
-            GameManager.Inst.IncreaseTimer(50f);
+            gameManager.DecreaseTimer(50f);
+            gameManager.IncreaseTimer(50f);
             timers[currentRound].localScale = Vector2.one *
                 (0.5f + 0.5f * Mathf.Abs( Mathf.Sin(timer * 5f)));
             yield return null;
         }
 
-        // Timer Reset
-        GameManager.Inst.roundTimer[currentRound - 1] = 0f;
-        round_UI.RefreshTimer(currentRound - 1, 0f);
+        // 타이머 강제 리셋 
+        gameManager.RoundTimer[currentRound - 1] = 0f;
+        UIManager.Inst.RefreshTimer(currentRound - 1, 0f);
         timers[currentRound].localScale = Vector2.one;
         timers[currentRound - 1].gameObject.SetActive(false);
     }
 
-    private void ActivateNextTimer()
+    public void ActivateNextTimer(int currentRound)
     {
-        timers[GameManager.Inst.CurrentRound].gameObject.SetActive(true);
-        StartCoroutine(TimerAnimation());
+        timers[currentRound].gameObject.SetActive(true);
+        StartCoroutine(TimerAnimation(currentRound));
         //timers[GameManager.Inst.CurrentRound - 1].gameObject.SetActive(false);
     }
 }

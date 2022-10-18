@@ -5,14 +5,12 @@ using UnityEngine.EventSystems;
 
 public class Button_Base : MonoBehaviour, IPointerEnterHandler, IPointerUpHandler
 {
-    protected InfoPanel panel;
     protected CanvasGroup buttonGroup;
 
     protected string notificationText;
 
     protected virtual void Awake()
     {
-        panel = FindObjectOfType<InfoPanel>();
         buttonGroup = GetComponentInParent<CanvasGroup>();
     }
 
@@ -22,7 +20,7 @@ public class Button_Base : MonoBehaviour, IPointerEnterHandler, IPointerUpHandle
     /// <param name="eventData"></param>
     public void OnPointerEnter(PointerEventData eventData)
     {
-        panel.ShowPanel(notificationText);
+        UIManager.Inst.InfoPanel.ShowPanel(notificationText);
     }
 
     /// <summary>

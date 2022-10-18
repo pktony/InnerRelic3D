@@ -6,6 +6,7 @@ using UnityEngine.InputSystem;
 
 public class SpawnerController : MonoBehaviour
 {
+    GameManager gameManager;
     List<GameObject> enemies = new();
 
     private EnemySpawner[] spawners;
@@ -32,15 +33,16 @@ public class SpawnerController : MonoBehaviour
 
     private void Start()
     {
-        GameManager.Inst.startSpawn += StartChecking;
-        GameManager.Inst.onRoundOver += InstantKillAllEnemies;
+        gameManager = GameManager.Inst;
+        gameManager.startSpawn += StartChecking;
+        gameManager.onRoundOver += InstantKillAllEnemies;
     }
 
     private void Update()
     {// TEST
         if(Keyboard.current.digit3Key.wasPressedThisFrame)
         {
-            InstantKillAllEnemies();
+            InstantKillAllEnemies(0);
         }
     }
 
@@ -51,7 +53,7 @@ public class SpawnerController : MonoBehaviour
 
     IEnumerator CheckPopulation()
     {
-        while(!GameManager.Inst.IsRoundOver)
+        while(!gameManager.IsRoundOver)
         {
             timer += checkInterval;
 
@@ -64,7 +66,7 @@ public class SpawnerController : MonoBehaviour
         }
     }
 
-    private void InstantKillAllEnemies()
+    private void InstantKillAllEnemies(int _)
     {
         foreach(var enemy in enemies)
         {
@@ -81,9 +83,9 @@ public class SpawnerController : MonoBehaviour
         Enemy enemy = obj.GetComponent<Enemy>();
         enemy.onDie += () =>
         {
-            if (!GameManager.Inst.IsRoundOver)
+            if (!gameManager.IsRoundOver)
             {
-                GameManager.Inst.EnemiesLeft--;
+                gameManager.ReduceEnemyCount();
                 enemies.Remove(obj);
             }
         };
