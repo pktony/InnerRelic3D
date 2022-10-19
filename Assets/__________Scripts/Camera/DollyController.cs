@@ -12,7 +12,6 @@ public class DollyController : MonoBehaviour
     MainCam mainCam;
 
     CamDrag_Panel controlUI;
-    Round_UI roundUI;
 
     public Action onIntroEnd;
 
@@ -24,15 +23,12 @@ public class DollyController : MonoBehaviour
         mainCam = FindObjectOfType<MainCam>(true);
 
         controlUI = FindObjectOfType<CamDrag_Panel>();
-        roundUI = FindObjectOfType<Round_UI>();
     }
 
     public void InitializeIntroUIs()
     {
         dollyCart.m_Position = 0f;
-        GameManager.Inst.Player_Stats.gameObject.SetActive(false);
         controlUI.transform.parent.gameObject.SetActive(false);
-        roundUI.gameObject.SetActive(false);
 
         StartCoroutine(Intro());
     }
@@ -47,7 +43,6 @@ public class DollyController : MonoBehaviour
                 mainCam.gameObject.SetActive(true);
                 GameManager.Inst.Player_Stats.gameObject.SetActive(true);
                 controlUI.transform.parent.gameObject.SetActive(true);
-                roundUI.gameObject.SetActive(true);
 
                 onIntroEnd?.Invoke();
                 break;
