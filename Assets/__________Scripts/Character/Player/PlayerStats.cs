@@ -15,6 +15,7 @@ public class PlayerStats : MonoBehaviour, IHealth, IBattle
     float maxHealthPoint = 100f;
     [SerializeField] float attackPower = 10f;
     float defencePower = 5f;
+    bool isDead = false;
 
     private Transform lockonTarget;
 
@@ -68,10 +69,21 @@ public class PlayerStats : MonoBehaviour, IHealth, IBattle
             }
             else
             {
-                Debug.Log("Die");
+                if (!isDead)
+                {
+                    isDead = true;
+                    anim_Sword.SetBool("isDead", isDead);
+                    anim_Archer.SetBool("isDead", isDead);
+                    anim_Archer.SetTrigger("onDie");
+                    anim_Sword.SetTrigger("onDie");
+                    GameManager.Inst.IsGameOver = true;
+                    Debug.Log("Die");
+                }
             }
         }
     }
+
+    public bool IsDead => isDead;
 
     public Transform LockonTarget
     {
@@ -128,7 +140,7 @@ public class PlayerStats : MonoBehaviour, IHealth, IBattle
         }
 
         // TEST 
-        healthPoint = 40f;
+        //healthPoint = 40f;
     }
 
     private void Update()

@@ -33,7 +33,6 @@ public enum Skills : byte
 public enum EnemyState : byte
 {
     Idle = 0,
-    Patrol,
     Track,
     Attack,
     Knockback,
