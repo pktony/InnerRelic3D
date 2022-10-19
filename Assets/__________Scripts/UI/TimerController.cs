@@ -6,6 +6,7 @@ using UnityEngine;
 public class TimerController : MonoBehaviour
 {
     GameManager gameManager;
+    UIManager uiManager;
 
     RectTransform[] timers;
 
@@ -23,6 +24,7 @@ public class TimerController : MonoBehaviour
     private void Start()
     {
         gameManager = GameManager.Inst;
+        uiManager = UIManager.Inst;
     }
 
     IEnumerator TimerAnimation(int currentRound)
@@ -50,9 +52,10 @@ public class TimerController : MonoBehaviour
 
         // 타이머 강제 리셋 
         gameManager.RoundTimer[currentRound - 1] = 0f;
-        UIManager.Inst.RefreshTimer(currentRound - 1, 0f);
+        uiManager.RefreshTimer(currentRound - 1, 0f);
         timers[currentRound].localScale = Vector2.one;
         timers[currentRound - 1].gameObject.SetActive(false);
+        uiManager.RoundUI.ShowVictoryUI();
     }
 
     public void ActivateNextTimer(int currentRound)

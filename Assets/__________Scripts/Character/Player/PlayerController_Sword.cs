@@ -37,17 +37,17 @@ public class PlayerController_Sword : PlayerController
 
     protected override void OnRightClick(InputAction.CallbackContext obj)
     {// 방어 스킬
-        if (GameManager.Inst.Player_Stats.CoolTimes[(int)Skills.Defence].IsReadyToUse())
+        if (gameManager.Player_Stats.CoolTimes[(int)Skills.Defence].IsReadyToUse())
         {
             StartCoroutine(FreezeControl(1.0f));
-            GameManager.Inst.Player_Stats.UseInvincibleSkill();
+            gameManager.Player_Stats.UseInvincibleSkill();
         }
     }
     
 
     protected override void OnSpecialAttack(InputAction.CallbackContext context)
     {
-        if (GameManager.Inst.Player_Stats.CoolTimes[(int)Skills.SpecialAttack_Sword].IsReadyToUse())
+        if (gameManager.Player_Stats.CoolTimes[(int)Skills.SpecialAttack_Sword].IsReadyToUse())
         {
             swordTrails[0].enabled = true;
             swordTrails[1].enabled = true;
@@ -61,7 +61,7 @@ public class PlayerController_Sword : PlayerController
                 if (!isDizzy)
                 {
                     isSpinning = false;
-                    GameManager.Inst.Player_Stats.CoolTimes[(int)Skills.SpecialAttack_Archer].ResetCoolTime();
+                    gameManager.Player_Stats.CoolTimes[(int)Skills.SpecialAttack_Archer].ResetCoolTime();
                     if (spinTimer > dizzyTime)
                     {
                         isDizzy = true;
@@ -84,7 +84,7 @@ public class PlayerController_Sword : PlayerController
             spinTimer += 1.0f;
             if(spinTimer > dizzyTime )
             {
-                GameManager.Inst.Player_Stats.CoolTimes[(int)Skills.SpecialAttack_Archer].ResetCoolTime();
+                gameManager.Player_Stats.CoolTimes[(int)Skills.SpecialAttack_Archer].ResetCoolTime();
                 isDizzy = true;
                 isSpinning = false;
                 StartCoroutine(FreezeControl(2.0f));

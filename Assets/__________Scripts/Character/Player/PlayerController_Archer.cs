@@ -104,7 +104,7 @@ public class PlayerController_Archer : PlayerController
 
     protected override void OnSpecialAttack(InputAction.CallbackContext context)
     {
-        if (GameManager.Inst.Player_Stats.CoolTimes[(int)Skills.SpecialAttack_Archer].IsReadyToUse())
+        if (gameManager.Player_Stats.CoolTimes[(int)Skills.SpecialAttack_Archer].IsReadyToUse())
         {
             if (context.performed)
             {// Charging 애니메이션까지는 자동으로 넘어간다
@@ -113,7 +113,7 @@ public class PlayerController_Archer : PlayerController
                 isCharging = true;
                 anim.SetBool("isSpecialAttack", isCharging);
                 currentVelocity = MIN_INITIAL_VELOCITY_X * MIN_INITIAL_VELOCITY_X * transform.forward;
-                if (GameManager.Inst.Player_Stats.LockonTarget == null) // 일반 특수 활 발사 
+                if (gameManager.Player_Stats.LockonTarget == null) // 일반 특수 활 발사 
                     StartCoroutine(SpecialCharging(1, 5));
                 else // 베지어 활 발사 
                     StartCoroutine(SpecialCharging(5, 50, 10));
@@ -124,7 +124,7 @@ public class PlayerController_Archer : PlayerController
                 isCharging = false;
                 anim.SetBool("isSpecialAttack", isCharging);
 
-                if (GameManager.Inst.Player_Stats.LockonTarget == null)
+                if (gameManager.Player_Stats.LockonTarget == null)
                 {// 락온 타겟이 없으면 전방에 일정 각도로 퍼지는 공격 
                     shootPositions.InitializeShootPosition(chargeCount);
                     ShootArrows(chargeCount, arrowSpecial_Prefab);
@@ -134,7 +134,7 @@ public class PlayerController_Archer : PlayerController
                 {// 락온 타겟이 있으면 베지어 곡선을 따라가는 화살 발사 
                     StartCoroutine(ShootBezierArrows(chargeCount));
                 }
-                GameManager.Inst.Player_Stats.CoolTimes[(int)Skills.SpecialAttack_Archer].ResetCoolTime();
+                gameManager.Player_Stats.CoolTimes[(int)Skills.SpecialAttack_Archer].ResetCoolTime();
             }
         }
     }
@@ -145,7 +145,7 @@ public class PlayerController_Archer : PlayerController
         while(isCharging && chargeCount < maximumArrows)
         {
             chargeCount += perCount;
-            Instantiate(GameManager.Inst.Player_Stats.Particles[2], transform.position + transform.up, Quaternion.identity);
+            Instantiate(gameManager.Player_Stats.Particles[2], transform.position + transform.up, Quaternion.identity);
             Debug.Log(chargeCount);
             yield return chargeWaitSeconds;
         }
@@ -174,10 +174,10 @@ public class PlayerController_Archer : PlayerController
 
     protected override void OnRightClick(InputAction.CallbackContext _)
     {//     
-        if(GameManager.Inst.Player_Stats.CoolTimes[(int)Skills.Dodge].IsReadyToUse())
+        if(gameManager.Player_Stats.CoolTimes[(int)Skills.Dodge].IsReadyToUse())
         {
             anim.SetTrigger("onDodge");
-            GameManager.Inst.Player_Stats.CoolTimes[(int)Skills.Dodge].ResetCoolTime();
+            gameManager.Player_Stats.CoolTimes[(int)Skills.Dodge].ResetCoolTime();
             controller.detectCollisions = false;
         }
     }

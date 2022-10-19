@@ -138,9 +138,11 @@ public class PlayerStats : MonoBehaviour, IHealth, IBattle
             coolTimeDatas[i] = new CoolTimeData(skillDatas[i]);
             coolTimeDatas[i].onCoolTimeChange += coolTimeManager[i].RefreshUI;
         }
+    }
 
-        // TEST 
-        //healthPoint = 40f;
+    private void Start()
+    {
+        healthPoint = maxHealthPoint;
     }
 
     private void Update()
@@ -186,11 +188,6 @@ public class PlayerStats : MonoBehaviour, IHealth, IBattle
             counter++;
             yield return healWaitSeconds;
         }
-    }
-
-    public void OnSpcicialAttack()
-    {
-
     }
 
     public Vector3 GetTargetDirection()

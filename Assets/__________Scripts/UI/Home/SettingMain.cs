@@ -6,6 +6,8 @@ using UnityEngine.UI;
 
 public class SettingMain : MonoBehaviour, IPointerClickHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
+    SettingManager settingManager;
+
     CanvasGroup group;
 
     Image volumeBar;    // EventSystem용 Image
@@ -29,8 +31,9 @@ public class SettingMain : MonoBehaviour, IPointerClickHandler, IBeginDragHandle
     }
 
     private void Start()
-    {// 처음 시작 초기화 
-        SettingData data = SettingManager.Inst.LoadSettingValues();
+    {// 처음 시작 초기화
+        settingManager = SettingManager.Inst;
+        SettingData data = settingManager.LoadSettingValues();
         masterVolumeBar.fillAmount = data.masterVolume;
         musicVolumeBar.fillAmount = data.musicVolume;
     }
@@ -52,11 +55,11 @@ public class SettingMain : MonoBehaviour, IPointerClickHandler, IBeginDragHandle
     {
         if (volumeBar.CompareTag("MasterVolume"))
         {
-            SettingManager.Inst.MasterVol = volumeBar.fillAmount;
+            settingManager.MasterVol = volumeBar.fillAmount;
         }
         else if (volumeBar.CompareTag("MusicVolume"))
         {
-            SettingManager.Inst.MusicVolume = volumeBar.fillAmount;
+            settingManager.MusicVolume = volumeBar.fillAmount;
         }
     }
 

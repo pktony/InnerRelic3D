@@ -38,11 +38,13 @@ public class UIManager : Singleton<UIManager>
     [SerializeField] private string roundEndInstrction = "VICTORY !";
 
     // 프로퍼티 -----------------------------------------------------------------
+    // - 홈 화면
     public LeaderBoard_Home LeaderBoard_Home => leaderBoard_Home;
     public SettingMain SettingMain => settingMain;
     public HomeButtons HomeButtons => homeButtons;
     public InfoPanel InfoPanel => infoPanel;
-    // - 인게임 
+    // - 인 게임
+    public Round_UI RoundUI => roundUI;
     public LeaderBoard_InGame LeaderBoard_InGame => leaderBoard_InGame;
     public GameoverUI GameoverUI => gameoverUI;
 
@@ -185,7 +187,6 @@ public class UIManager : Singleton<UIManager>
         if (currentRound != 3)
         {// 다음 라운드 준비
             timerController.ActivateNextTimer(currentRound);
-            roundUI.ShowVictoryUI();
         }
         else
         {// 게임 끝 

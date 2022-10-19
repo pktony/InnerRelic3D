@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Arrow : MonoBehaviour
 {
+    GameManager gameManager;
+
     protected Rigidbody rigid;
     private GameObject model;
     protected ParticleSystem hitParticle;
@@ -23,7 +25,9 @@ public class Arrow : MonoBehaviour
 
     protected virtual void Start()
     {
-        rigid.AddForce(GameManager.Inst.ArcherController.CurrentVelocity.magnitude * transform.forward, ForceMode.Impulse);
+        gameManager = GameManager.Inst;
+        rigid.AddForce(gameManager.ArcherController.CurrentVelocity.magnitude *
+            transform.forward, ForceMode.Impulse);
     }
 
     private void FixedUpdate()
@@ -31,7 +35,6 @@ public class Arrow : MonoBehaviour
         if(rigid.velocity.sqrMagnitude > 0)
             rigid.MoveRotation(Quaternion.LookRotation(rigid.velocity));
     }
-
 
     protected virtual void OnTriggerEnter(Collider collider)
     {
@@ -43,7 +46,7 @@ public class Arrow : MonoBehaviour
         {
             StartCoroutine(PlayParticles(hitParticle));
             IBattle target = collider.GetComponent<IBattle>();
-            target?.TakeDamage(GameManager.Inst.Player_Stats.AttackPower);
+            target?.TakeDamage(gameManager.Player_Stats.AttackPower);
         }
         else
             Destroy(this.gameObject);
