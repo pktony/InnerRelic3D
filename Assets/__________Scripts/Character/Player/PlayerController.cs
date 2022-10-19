@@ -11,6 +11,8 @@ using UnityEditor;
 
 public abstract class PlayerController : MonoBehaviour
 {
+    protected GameManager gameManager;
+
     protected InputActions actions;
     protected Animator anim;
     protected CharacterController controller;
@@ -67,6 +69,7 @@ public abstract class PlayerController : MonoBehaviour
         actions = new();
         controller = GetComponentInParent<CharacterController>();
         anim = GetComponent<Animator>();
+        anim.SetBool("isDead", false);
         lockonFollowTarget = transform.parent.GetChild(2);
 
         // 락온 ----------------------------
@@ -92,6 +95,7 @@ public abstract class PlayerController : MonoBehaviour
 
     protected virtual void Start()
     {
+        gameManager = GameManager.Inst;
         //lockonCam.gameObject.SetActive(false);
     }
 
@@ -131,16 +135,19 @@ public abstract class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        Move_Turn();
-
-        jumpVector += gravity * Time.deltaTime;
-        controller.Move(jumpVector * Time.deltaTime);
-        isGrounded = controller.isGrounded;
-
-        if (isGrounded)
+        if (!gameManager.Player_Stats.IsDead)
         {
-            anim.SetBool("isOnAir", false);
-            jumpCounter = 0;
+            Move_Turn();
+
+            jumpVector += gravity * Time.deltaTime;
+            controller.Move(jumpVector * Time.deltaTime);
+            isGrounded = controller.isGrounded;
+
+            if (isGrounded)
+            {
+                anim.SetBool("isOnAir", false);
+                jumpCounter = 0;
+            }
         }
     }
 
@@ -165,10 +172,10 @@ public abstract class PlayerController : MonoBehaviour
                     break;
                 case ControlMode.LockedOn:
                     // 플레이어가 락온된 상대를 바라보며 카메라를 기준으로 움직인
-                    if (GameManager.Inst.Player_Stats.LockonTarget != null)
+                    if (gameManager.Player_Stats.LockonTarget != null)
                     {
                         relativeMoveDir = Quaternion.LookRotation(
-                            GameManager.Inst.Player_Stats.LockonTarget.position - transform.parent.position, Vector3.up);
+                            gameManager.Player_Stats.LockonTarget.position - transform.parent.position, Vector3.up);
                         transform.parent.rotation = Quaternion.RotateTowards(
                             transform.parent.rotation, relativeMoveDir, turnSpeed);
                         moveDir = relativeMoveDir * moveDir;
@@ -220,7 +227,7 @@ public abstract class PlayerController : MonoBehaviour
     private void Heal_Performed(InputAction.CallbackContext _)
     {
         anim.SetTrigger("onHeal");
-        GameManager.Inst.Player_Stats.Heal();
+        gameManager.Player_Stats.Heal();
     }
 
     private void OnLockOn(InputAction.CallbackContext _)
@@ -239,7 +246,7 @@ public abstract class PlayerController : MonoBehaviour
             playerWeapon.SwitchWeapon(Weapons.Bow);
         }
         
-        if (GameManager.Inst.Player_Stats.LockonTarget != null)
+        if (gameManager.Player_Stats.LockonTarget != null)
         {
             LockOff();
             TargetLock();
@@ -272,7 +279,7 @@ public abstract class PlayerController : MonoBehaviour
 
         if (lockonCollider.Length > 0)
         {
-            if (GameManager.Inst.Player_Stats.LockonTarget == null)
+            if (gameManager.Player_Stats.LockonTarget == null)
             {
                 float closestDistance = float.MaxValue;
                 foreach (Collider coll in lockonCollider)
@@ -283,10 +290,10 @@ public abstract class PlayerController : MonoBehaviour
                     if (distanceSqr < closestDistance)
                     {// 거리가 더 짧을 경우 새로운 값 저장 
                         closestDistance = distanceSqr;
-                        GameManager.Inst.Player_Stats.LockonTarget = coll.transform;
+                        gameManager.Player_Stats.LockonTarget = coll.transform;
                     }
                 }
-                Transform target = GameManager.Inst.Player_Stats.LockonTarget;
+                Transform target = gameManager.Player_Stats.LockonTarget;
                 target.GetComponent<Enemy>().onDie += LockOff;
                 transform.parent.rotation = Quaternion.LookRotation(target.position - transform.parent.position);
 
@@ -318,7 +325,7 @@ public abstract class PlayerController : MonoBehaviour
 
     private void LockOff()
     {
-        GameManager.Inst.Player_Stats.LockonTarget = null;
+        gameManager.Player_Stats.LockonTarget = null;
         lockOnEffect.transform.parent = this.transform;
 
         lockOnEffect.SetActive(false);

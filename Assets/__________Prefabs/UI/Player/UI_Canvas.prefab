@@ -3264,7 +3264,7 @@ PrefabInstance:
     - target: {fileID: 2094624485722590239, guid: ca2a9bdeae5e644ab9563b48f34cd7ad, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 1839654662091812638}
+      objectReference: {fileID: 0}
     - target: {fileID: 2094624485722590239, guid: ca2a9bdeae5e644ab9563b48f34cd7ad, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: HideSettings
@@ -3365,19 +3365,9 @@ PrefabInstance:
       propertyPath: m_Name
       value: Back Button
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 2094624485722590239, guid: ca2a9bdeae5e644ab9563b48f34cd7ad, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: ca2a9bdeae5e644ab9563b48f34cd7ad, type: 3}
---- !u!114 &1839654662091812638 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5302166302796950336, guid: ca2a9bdeae5e644ab9563b48f34cd7ad, type: 3}
-  m_PrefabInstance: {fileID: 5769902780044903518}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 06e0001a76dc84d96abec4fc77b29b3a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!224 &1839654662091812639 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 5302166302796950337, guid: ca2a9bdeae5e644ab9563b48f34cd7ad, type: 3}

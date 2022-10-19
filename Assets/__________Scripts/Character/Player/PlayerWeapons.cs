@@ -51,12 +51,12 @@ public class PlayerWeapons : MonoBehaviour
         {// 다를 때만 실행 
             //스킬 UI 관련
             switchParticle.Play();
-            coolTimeUIs[2 - (int)weaponType].gameObject.SetActive(false);   // HP UI
-            coolTimeUIs[3 - (int)weaponType].gameObject.SetActive(false);   // Special Attack
+            //coolTimeUIs[2 - (int)weaponType].gameObject.SetActive(false);   // HP UI
+            coolTimeUIs[2 - (int)weaponType].gameObject.SetActive(false);   // Special Attack
             coolTimeUIs[4 - (int)weaponType].gameObject.SetActive(false);   // Defence / Dodge UI
 
-            coolTimeUIs[1 + (int)weaponType].gameObject.SetActive(true);    // HP UI
-            coolTimeUIs[2 + (int)weaponType].gameObject.SetActive(true);    // Special Attack
+            //coolTimeUIs[1 + (int)weaponType].gameObject.SetActive(true);    // HP UI
+            coolTimeUIs[1 + (int)weaponType].gameObject.SetActive(true);    // Special Attack
             coolTimeUIs[3 + (int)weaponType].gameObject.SetActive(true);    // Defence / Dodge UI
 
             // 캐릭터 변경

@@ -23,7 +23,6 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
     [Header("AI")]
     [SerializeField] float detectedRange = 5.0f;
     [SerializeField] float attackRange = 2.0f;
-    [SerializeField] float timetoPatrol = 1.0f;
     private bool isDead = false;
 
     private float updateInterval = 0.5f;

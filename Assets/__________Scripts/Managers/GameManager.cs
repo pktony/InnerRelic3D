@@ -38,6 +38,15 @@ public class GameManager : Singleton<GameManager>
     public PlayerController_Archer ArcherController => archerController;
     public float[] RoundTimer => roundTimer;
     public bool IsRoundOver => isRoundOver;
+    public bool IsGameOver
+    {
+        get => isGameOver;
+        set
+        {
+            isGameOver = value;
+            onGameover?.Invoke();
+        }
+    }
     public int CurrentRound
     {
         get => currentRound;
@@ -111,6 +120,7 @@ public class GameManager : Singleton<GameManager>
     {
         uiManager = UIManager.Inst;
         dollyController.InitializeIntroUIs();
+        mainPlayer.gameObject.SetActive(false);
 
         // 타이머 초기화 
         roundTimer = new float[totalRounds];
@@ -147,12 +157,11 @@ public class GameManager : Singleton<GameManager>
     private void StartRoundTimer()
     {
         DecreaseTimer();
+
         if (roundTimer[currentRound - 1] <= 0f)
         {
-            isRoundOver = true;
-            isGameOver = true;
+            IsGameOver = true;
             roundTimer[currentRound - 1] = 0f;
-            onGameover?.Invoke();
         }
     }
 
