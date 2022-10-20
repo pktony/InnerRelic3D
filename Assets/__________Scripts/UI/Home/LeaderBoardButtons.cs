@@ -26,5 +26,6 @@ public class LeaderBoardButtons : MonoBehaviour, IPointerClickHandler
         uiManager.LeaderBoard_Home.ShowLeaderBoard();
         homeButtons.HideButtons();
         settingManager.Panel.SetWindowSize(UIWindow.LeaderBoard);
+        SoundManager.Inst.PlaySound_UI(UIClips.Click);
     }
 }

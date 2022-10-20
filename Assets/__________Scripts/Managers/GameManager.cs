@@ -6,6 +6,7 @@ using UnityEngine;
 public class GameManager : Singleton<GameManager>
 {
     UIManager uiManager;
+    SoundManager soundManager;
 
     PlayerStats mainPlayer;
     PlayerController_Archer archerController;
@@ -36,6 +37,7 @@ public class GameManager : Singleton<GameManager>
     // 프로퍼티 ------------------------------------------------------------------
     public PlayerStats Player_Stats => mainPlayer;
     public PlayerController_Archer ArcherController => archerController;
+    public PlayerController_Sword SwordController => swordController;
     public float[] RoundTimer => roundTimer;
     public bool IsRoundOver => isRoundOver;
     public bool IsGameOver
@@ -81,6 +83,7 @@ public class GameManager : Singleton<GameManager>
                 else if (enemiesLeft == 3)
                 {
                     uiManager.InfoPanel.ShowPanel("3 Enemies Left. Keep Up");
+                    soundManager.PlaySound_UI(UIClips.TimeTicking);
                     onEnemyDieRed?.Invoke(enemiesLeft);
                 }
                 else if (enemiesLeft > 0)
@@ -88,7 +91,8 @@ public class GameManager : Singleton<GameManager>
                 else if (enemiesLeft == 0)
                 {
                     isRoundOver = true;
-                    //StartCoroutine(SlowMotion());
+                    soundManager.PlaySound_UI(UIClips.Victory);
+                    StartCoroutine(SlowMotion());
                     onRoundOver?.Invoke(currentRound);
                     if (currentRound == totalRounds)
                     {
@@ -119,6 +123,7 @@ public class GameManager : Singleton<GameManager>
     private void Start()
     {
         uiManager = UIManager.Inst;
+        soundManager = SoundManager.Inst;
         dollyController.InitializeIntroUIs();
         mainPlayer.gameObject.SetActive(false);
 

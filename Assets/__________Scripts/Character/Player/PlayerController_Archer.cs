@@ -34,6 +34,7 @@ public class PlayerController_Archer : PlayerController
         trajectoryPoints = new();
         lineRend = transform.GetComponent<LineRenderer>();
         lineRend.useWorldSpace = false;
+        lineRend.enabled = false;
         shootPositions = GetComponentInChildren<ShootPositions>();
 
         chargeWaitSeconds = new WaitForSeconds(1.0f);
@@ -50,8 +51,8 @@ public class PlayerController_Archer : PlayerController
     {
         if(context.performed)
         {
-            prevControlMode = controlMode;
-            controlMode = ControlMode.AimMode;
+            prevControlMode = gameManager.Player_Stats.ControlMode;
+            gameManager.Player_Stats.ControlMode = ControlMode.AimMode;
             isAiming = true;
             anim.SetBool("isAiming", isAiming);
             //lineRend.enabled = true;
@@ -59,7 +60,7 @@ public class PlayerController_Archer : PlayerController
         }
         else if(context.canceled)
         {
-            controlMode = prevControlMode;
+            gameManager.Player_Stats.ControlMode = prevControlMode;
             isAiming = false;
             anim.SetBool("isAiming", isAiming);
             ShootArrows(1, arrowPrefab);
@@ -108,8 +109,8 @@ public class PlayerController_Archer : PlayerController
         {
             if (context.performed)
             {// Charging 애니메이션까지는 자동으로 넘어간다
-                prevControlMode = controlMode;
-                controlMode = ControlMode.AimMode;
+                prevControlMode = gameManager.Player_Stats.ControlMode;
+                gameManager.Player_Stats.ControlMode = ControlMode.AimMode;
                 isCharging = true;
                 anim.SetBool("isSpecialAttack", isCharging);
                 currentVelocity = MIN_INITIAL_VELOCITY_X * MIN_INITIAL_VELOCITY_X * transform.forward;
@@ -120,7 +121,7 @@ public class PlayerController_Archer : PlayerController
             }
             else if (context.canceled)
             {// 발사
-                controlMode = prevControlMode;
+                gameManager.Player_Stats.ControlMode = prevControlMode;
                 isCharging = false;
                 anim.SetBool("isSpecialAttack", isCharging);
 
@@ -165,6 +166,7 @@ public class PlayerController_Archer : PlayerController
         {
             GameObject obj = Instantiate(arrowBezier_Prefab);
             obj.transform.position = firePosition[0].position;
+            soundManager.PlaySound_Player(audioSource, PlayerClips.SpecialAttack_Arhcer);
             obj = Instantiate(arrowBezier_Prefab);
             obj.transform.position = firePosition[0].position;
             arrowCount += 5;
@@ -186,12 +188,4 @@ public class PlayerController_Archer : PlayerController
     {
         controller.detectCollisions = true;
     }
-
-
-#if UNITY_EDITOR
-    protected override void OnDrawGizmos()
-    {
-        base.OnDrawGizmos();
-    }
-#endif
 }

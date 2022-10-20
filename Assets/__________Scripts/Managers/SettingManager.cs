@@ -7,31 +7,8 @@ using System.IO;
 
 public class SettingManager : Singleton<SettingManager>
 {
-    private float masterVolume = 1.0f;
-    public float MasterVol
-    {
-        get => masterVolume;
-        set
-        {
-            masterVolume = value;
-            settingData.masterVolume = masterVolume;
-        }
-    }
-
-    private float musicVolume = 1.0f;
-    public float MusicVolume
-    {
-        get => musicVolume;
-        set
-        {
-            musicVolume = value;
-            settingData.musicVolume = musicVolume;
-        }
-    }
-
     private PanelResizer panel;
     public PanelResizer Panel => panel;
-
 
     // Save 관련 -------------------------------------------
     // Setting
@@ -46,6 +23,7 @@ public class SettingManager : Singleton<SettingManager>
     private float[] scores;
 
     public float[] Scores => scores;
+    public SettingData SettingData => settingData;
 
     protected override void Awake()
     {
@@ -57,6 +35,10 @@ public class SettingManager : Singleton<SettingManager>
 
     private void Initialize(Scene arg0, LoadSceneMode arg1)
     {
+        settingData = LoadSettingValues();
+        SoundManager.Inst.MasterVol = settingData.masterVolume;
+        SoundManager.Inst.MusicVolume = settingData.musicVolume;
+
         // 랭킹 데이터 불러와서 입력 
         rankData = LoadRankDatas();
         scores = rankData.scores;
@@ -73,8 +55,6 @@ public class SettingManager : Singleton<SettingManager>
             board_InGame.RefreshLeaderBoard();
         }
     }
-
-    public float GetMusicVolume() => masterVolume * musicVolume;
 
     public void SaveSettingValues()
     {

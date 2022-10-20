@@ -12,21 +12,20 @@ using UnityEditor;
 public abstract class PlayerController : MonoBehaviour
 {
     protected GameManager gameManager;
+    protected SoundManager soundManager;
 
     protected InputActions actions;
     protected Animator anim;
     protected CharacterController controller;
-
-    protected GameObject mainCam;
-    protected CinemachineVirtualCamera lockonCam;
-
-    protected ControlMode controlMode = ControlMode.Normal;
+    protected AudioSource audioSource;
+    
     protected ControlMode prevControlMode;
 
     // ################### Move ######################3
-    Vector3 moveDir = Vector3.zero;
-    float moveSpeed = 0f;
-    Quaternion relativeMoveDir = Quaternion.identity;
+    private Vector3 moveDir = Vector3.zero;
+    private float moveSpeed = 0f;
+    private Quaternion relativeMoveDir = Quaternion.identity;
+    private bool isAttacking = false;
 
     [SerializeField] float walkSpeed = 3.0f;
 
@@ -42,50 +41,21 @@ public abstract class PlayerController : MonoBehaviour
     private Vector3 jumpVector;
     private Vector3 gravity;
 
-    // ################ Target Lockon
-    [SerializeField] float lockOnRadius = 20f;
-    private GameObject lockOnEffect;
-    private Collider[] lockonCollider = new Collider[5];
-    private Transform lockonFollowTarget;
-
     // ################ Weapon Change
     PlayerWeapons playerWeapon;
 
     // ################## Properties #####################
     public Vector3 LookDir => lookDir;
 
-    public ControlMode ControlMode
-    {
-        get => controlMode;
-        set
-        {
-            controlMode = value;
-        }
-    }
 
     protected virtual void Awake()
     {
         // 컴포넌트 --------------------------
         actions = new();
         controller = GetComponentInParent<CharacterController>();
+        audioSource = GetComponentInParent<AudioSource>();
         anim = GetComponent<Animator>();
         anim.SetBool("isDead", false);
-        lockonFollowTarget = transform.parent.GetChild(2);
-
-        // 락온 ----------------------------
-        lockOnEffect = transform.parent.GetChild(4).gameObject;
-        lockOnEffect.SetActive(false);
-
-
-        // 카메라 --------------------------
-        mainCam = FindObjectOfType<MainCam>(true).gameObject;
-        CinemachineVirtualCamera cinemachine = mainCam.GetComponent<CinemachineVirtualCamera>();
-        cinemachine.Follow = this.transform.parent;
-        cinemachine.LookAt = this.transform.parent;
-        lockonCam = FindObjectOfType<LockonCam>(true).GetComponent<CinemachineVirtualCamera>();
-        lockonCam.Follow = transform.parent.GetChild(2);
-        mainCam.SetActive(false);
-        lockonCam.gameObject.SetActive(false);
 
         // 기타 --------------------------
         gravity = Physics.gravity;
@@ -96,7 +66,7 @@ public abstract class PlayerController : MonoBehaviour
     protected virtual void Start()
     {
         gameManager = GameManager.Inst;
-        //lockonCam.gameObject.SetActive(false);
+        soundManager = SoundManager.Inst;
     }
 
     private void OnEnable()
@@ -135,7 +105,7 @@ public abstract class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        if (!gameManager.Player_Stats.IsDead)
+        if (!gameManager.Player_Stats.IsDead && !isAttacking)
         {
             Move_Turn();
 
@@ -157,7 +127,7 @@ public abstract class PlayerController : MonoBehaviour
         {
             moveDir = keyboardInputDirection;
 
-            switch (controlMode)
+            switch (gameManager.Player_Stats.ControlMode)
             {
                 case ControlMode.Normal:
                     // 플레이어가 카메라를 기준으로 방향을 결정한다 
@@ -186,78 +156,83 @@ public abstract class PlayerController : MonoBehaviour
         controller.Move(moveSpeed * Time.fixedDeltaTime * moveDir);
     }
 
-    void Jump()
-    {
-        jumpVector.y = jumpHeight;
-        anim.SetTrigger("onJump");
-        anim.SetBool("isOnAir", true);
-    }
-
     private void OnMoveInput(InputAction.CallbackContext context)
     {
-        Vector3 inputDir = context.ReadValue<Vector2>();
-        keyboardInputDirection = new Vector3(inputDir.x, 0, inputDir.y);
-        //-------------------------
-        if (keyboardInputDirection.sqrMagnitude > 0)
+        if (!gameManager.Player_Stats.IsDead)
         {
-            moveSpeed = walkSpeed * inputDir.normalized.sqrMagnitude;
-        }
-        else
-        {
-            moveSpeed = 0f;
-        }
-        // ------------------------
-
-        if (controlMode != ControlMode.LockedOn)
-        {
-            keyboardInputDirection = Quaternion.Euler(0, Camera.main.transform.rotation.eulerAngles.y, 0) * keyboardInputDirection;
+            Vector3 inputDir = context.ReadValue<Vector2>();
+            keyboardInputDirection = new Vector3(inputDir.x, 0, inputDir.y);
+            //-------------------------
             if (keyboardInputDirection.sqrMagnitude > 0)
             {
-                relativeMoveDir = Quaternion.LookRotation(keyboardInputDirection, Vector3.up);
+                moveSpeed = walkSpeed * inputDir.normalized.sqrMagnitude;
             }
-        }
+            else
+            {
+                moveSpeed = 0f;
+            }
+            // ------------------------
 
-        anim.SetFloat("Speed", moveSpeed);
+            if (gameManager.Player_Stats.ControlMode != ControlMode.LockedOn)
+            {
+                keyboardInputDirection = Quaternion.Euler(0, Camera.main.transform.rotation.eulerAngles.y, 0) * keyboardInputDirection;
+                if (keyboardInputDirection.sqrMagnitude > 0)
+                {
+                    relativeMoveDir = Quaternion.LookRotation(keyboardInputDirection, Vector3.up);
+                }
+            }
+
+            anim.SetFloat("Speed", moveSpeed);
+        }
     }
 
-    protected virtual void OnAttack(InputAction.CallbackContext _) { }
+    protected virtual void OnAttack(InputAction.CallbackContext _) { isAttacking = true; }
     protected virtual void OnRightClick(InputAction.CallbackContext _) { }
     protected virtual void OnSpecialAttack(InputAction.CallbackContext _) { }
 
     private void Heal_Performed(InputAction.CallbackContext _)
     {
-        anim.SetTrigger("onHeal");
-        gameManager.Player_Stats.Heal();
+        if (!gameManager.Player_Stats.IsDead)
+        {
+            anim.SetTrigger("onHeal");
+            gameManager.Player_Stats.Heal();
+
+            soundManager.PlaySound_Player(audioSource, PlayerClips.Heal);
+        }
     }
 
     private void OnLockOn(InputAction.CallbackContext _)
     {
-        TargetLock();
+        gameManager.Player_Stats.TargetLock();
     }
 
     private void OnWeaponChange(InputAction.CallbackContext _)
     {
-        if (Keyboard.current.digit1Key.wasPressedThisFrame || Gamepad.current.leftShoulder.wasPressedThisFrame)
-        {// Sword 로 변경 
-            playerWeapon.SwitchWeapon(Weapons.Sword);
-        }
-        else if (Keyboard.current.digit2Key.wasPressedThisFrame || Gamepad.current.rightShoulder.wasPressedThisFrame)
-        {// Archer 로 변경 
-            playerWeapon.SwitchWeapon(Weapons.Bow);
-        }
-        
-        if (gameManager.Player_Stats.LockonTarget != null)
+        if (!gameManager.Player_Stats.IsDead)
         {
-            LockOff();
-            TargetLock();
+            if (Keyboard.current.digit1Key.wasPressedThisFrame || Gamepad.current.leftShoulder.wasPressedThisFrame)
+            {// Sword 로 변경 
+                playerWeapon.SwitchWeapon(Weapons.Sword);
+            }
+            else if (Keyboard.current.digit2Key.wasPressedThisFrame || Gamepad.current.rightShoulder.wasPressedThisFrame)
+            {// Archer 로 변경 
+                playerWeapon.SwitchWeapon(Weapons.Bow);
+            }
+
+            if (gameManager.Player_Stats.LockonTarget != null)
+            {
+                gameManager.Player_Stats.LockOff();
+                gameManager.Player_Stats.TargetLock();
+            }
         }
     }
 
     private void OnJumpInput(InputAction.CallbackContext _)
     {
-        if (isGrounded)
+        if (isGrounded && !gameManager.Player_Stats.IsDead)
         {
             Jump();
+            soundManager.PlaySound_Player(audioSource, PlayerClips.Jump);
             jumpCounter++;
             return;
         }
@@ -269,81 +244,20 @@ public abstract class PlayerController : MonoBehaviour
                 jumpCounter++;
                 anim.SetTrigger("FlipJump");
                 Jump();
+                soundManager.PlaySound_Player(audioSource, PlayerClips.DoubleJump);
             }
         }
     }
 
-    private void TargetLock()
+    void Jump()
     {
-        Physics.OverlapSphereNonAlloc(transform.position, lockOnRadius, lockonCollider, LayerMask.GetMask("Enemy"));
-
-        if (lockonCollider.Length > 0)
-        {
-            if (gameManager.Player_Stats.LockonTarget == null)
-            {
-                float closestDistance = float.MaxValue;
-                foreach (Collider coll in lockonCollider)
-                {
-                    if (coll == null)
-                        break;
-                    float distanceSqr = (coll.transform.position - transform.position).sqrMagnitude;
-                    if (distanceSqr < closestDistance)
-                    {// 거리가 더 짧을 경우 새로운 값 저장 
-                        closestDistance = distanceSqr;
-                        gameManager.Player_Stats.LockonTarget = coll.transform;
-                    }
-                }
-                Transform target = gameManager.Player_Stats.LockonTarget;
-                target.GetComponent<Enemy>().onDie += LockOff;
-                transform.parent.rotation = Quaternion.LookRotation(target.position - transform.parent.position);
-
-               //Test.position = target.position;
-
-                Transform lockOnEffectParent = target.transform.Find("LockOnEffectPosition");
-                lockOnEffect.transform.parent = lockOnEffectParent;
-                lockOnEffect.transform.position = lockOnEffectParent.position + new Vector3(0f, 0f, 0.6f);
-
-                lockOnEffect.SetActive(true);
-
-                mainCam.SetActive(false);
-                lockonFollowTarget.gameObject.SetActive(true);
-                lockonCam.LookAt = target;
-                lockonCam.gameObject.SetActive(true);
-
-                controlMode = ControlMode.LockedOn;
-            }
-            else
-            {
-                LockOff();
-            }
-        }
-        else
-        {
-            Debug.Log("No Lock on Target");
-        }
+        jumpVector.y = jumpHeight;
+        anim.SetTrigger("onJump");
+        anim.SetBool("isOnAir", true);
     }
 
-    private void LockOff()
-    {
-        gameManager.Player_Stats.LockonTarget = null;
-        lockOnEffect.transform.parent = this.transform;
-
-        lockOnEffect.SetActive(false);
-
-        lockonFollowTarget.gameObject.SetActive(false);
-        lockonCam.LookAt = null;
-        lockonCam.gameObject.SetActive(false);
-        mainCam.transform.position = lockonCam.transform.position;
-        mainCam.SetActive(true);
-
-        controlMode = ControlMode.Normal;
+    public void SetNotAttacking()
+    {// 애니메이션 이벤트 함수 
+        isAttacking = false;
     }
-
-#if UNITY_EDITOR
-    protected virtual void OnDrawGizmos()
-    {
-        Handles.color = Color.green;
-        Handles.DrawWireDisc(transform.position, Vector3.up, lockOnRadius, 3.0f);
-    }
-#endif
 }

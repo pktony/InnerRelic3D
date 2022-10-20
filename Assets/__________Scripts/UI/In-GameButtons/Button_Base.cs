@@ -21,6 +21,7 @@ public class Button_Base : MonoBehaviour, IPointerEnterHandler, IPointerUpHandle
     public void OnPointerEnter(PointerEventData eventData)
     {
         UIManager.Inst.InfoPanel.ShowPanel(notificationText);
+        SoundManager.Inst.PlaySound_UI(UIClips.InfoPop);
     }
 
     /// <summary>
