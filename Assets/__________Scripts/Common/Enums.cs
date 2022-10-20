@@ -45,3 +45,46 @@ public enum UIWindow : byte
     Setting,
     LeaderBoard
 }
+
+public enum MusicClips : byte
+{
+    Home = 0,
+    RoundStart,
+    Gameover,
+}
+
+public enum UIClips : byte
+{
+    Click = 0,
+    Drag,
+    InfoPop,
+    Victory,
+    TimeTicking,
+}
+
+public enum PlayerClips : byte
+{
+    NormalAttack_Sword1 = 0,
+    NoramlAttack_Sword2,
+    NoramlAttack_Sword3,
+    NoramlAttack_Archer,
+    SpecialAttack_Sword,
+    SpecialAttack_Demacia,
+    SpecialAttack_Arhcer,
+    Defence,
+    Dodge,
+    Lockon,
+    Lockoff,
+    LockonFailed,
+    Hit1,
+    Hit2,
+    Hit3,
+    Hit4,
+    Jump,
+    DoubleJump,
+    Heal,
+}
+
+public enum EnemyClip : byte
+{
+}

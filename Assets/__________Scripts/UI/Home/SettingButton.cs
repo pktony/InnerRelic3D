@@ -21,6 +21,7 @@ public class SettingButton : MonoBehaviour, IPointerClickHandler
         contentGroup.blocksRaycasts = true;
         homeButtons.HideButtons();
         SettingManager.Inst.Panel.SetWindowSize(UIWindow.Setting);
+        SoundManager.Inst.PlaySound_UI(UIClips.Click);
     }
 
 }

@@ -29,7 +29,8 @@ public class GameoverUI : MonoBehaviour
     }
 
     public IEnumerator ShowGameoverText()
-    {// 게임 오버 표시 
+    {// 게임 오버 표시
+        SoundManager.Inst.BGMSource.PlayBGM(MusicClips.Gameover);
         Color color = gameoverText.color;
         while (color.a <= 1f)
         {

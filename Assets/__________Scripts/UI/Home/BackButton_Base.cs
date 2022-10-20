@@ -19,5 +19,6 @@ public class BackButton_Base : MonoBehaviour, IPointerClickHandler
     public void OnPointerClick(PointerEventData eventData)
     {
         HideContent();
+        SoundManager.Inst.PlaySound_UI(UIClips.Click);
     }
 }

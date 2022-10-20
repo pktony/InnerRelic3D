@@ -1,33 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-6374563758420308752
-MonoBehaviour:
-  m_ObjectHideFlags: 3
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 899c54efeace73346a0a16faa3afe726, type: 3}
-  m_Name: Vignette
-  m_EditorClassIdentifier: 
-  active: 0
-  color:
-    m_OverrideState: 1
-    m_Value: {r: 0.1792453, g: 0.15979886, b: 0.16214158, a: 1}
-  center:
-    m_OverrideState: 0
-    m_Value: {x: 0.5, y: 0.5}
-  intensity:
-    m_OverrideState: 1
-    m_Value: 1
-  smoothness:
-    m_OverrideState: 1
-    m_Value: 0.347
-  rounded:
-    m_OverrideState: 1
-    m_Value: 1
 --- !u!114 &-4207762149344048462
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -40,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b2db86121404754db890f4c8dfe81b2, type: 3}
   m_Name: Bloom
   m_EditorClassIdentifier: 
-  active: 0
+  active: 1
   threshold:
     m_OverrideState: 1
     m_Value: 0.91
@@ -83,7 +55,35 @@ MonoBehaviour:
   components:
   - {fileID: -4207762149344048462}
   - {fileID: 2570706751164993768}
-  - {fileID: -6374563758420308752}
+  - {fileID: 1888864211195211496}
+--- !u!114 &1888864211195211496
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66f335fb1ffd8684294ad653bf1c7564, type: 3}
+  m_Name: ColorAdjustments
+  m_EditorClassIdentifier: 
+  active: 1
+  postExposure:
+    m_OverrideState: 0
+    m_Value: -1.04
+  contrast:
+    m_OverrideState: 0
+    m_Value: -13.34
+  colorFilter:
+    m_OverrideState: 0
+    m_Value: {r: 0.3962264, g: 0.3962264, b: 0.3962264, a: 1}
+  hueShift:
+    m_OverrideState: 0
+    m_Value: 2
+  saturation:
+    m_OverrideState: 1
+    m_Value: 0
 --- !u!114 &2570706751164993768
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -96,7 +96,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c01700fd266d6914ababb731e09af2eb, type: 3}
   m_Name: DepthOfField
   m_EditorClassIdentifier: 
-  active: 0
+  active: 1
   mode:
     m_OverrideState: 1
     m_Value: 2
@@ -113,14 +113,14 @@ MonoBehaviour:
     m_OverrideState: 0
     m_Value: 0
   focusDistance:
-    m_OverrideState: 1
+    m_OverrideState: 0
     m_Value: 20
   aperture:
     m_OverrideState: 0
     m_Value: 1
   focalLength:
-    m_OverrideState: 1
-    m_Value: 184
+    m_OverrideState: 0
+    m_Value: 200
   bladeCount:
     m_OverrideState: 0
     m_Value: 5

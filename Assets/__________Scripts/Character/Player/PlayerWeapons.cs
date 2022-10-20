@@ -63,19 +63,6 @@ public class PlayerWeapons : MonoBehaviour
             warriorType[(int)weaponType].SetActive(true);
             warriorType[1 - (int)weaponType].SetActive(false);
             weaponIndex = weaponType;
-
-            // 현재 컨트롤 모드 동기화
-            if (weaponType == Weapons.Sword)
-            {
-                controllers[0].ControlMode = controllers[1].ControlMode;
-            }
-            else
-            {
-                controllers[1].ControlMode = controllers[0].ControlMode;
-            }
-
-            // 0 선택 => 1 true, 2 false
-            // 1 선택 => 2 true, 1 false
         }
     }
     

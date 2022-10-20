@@ -44,6 +44,7 @@ public class InfoPanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, 
     public void ShowPanel(string notificationText)
     {
         text.text = notificationText;
+        
         if(!isShowing)
             StartCoroutine(RevealPanel());
     }

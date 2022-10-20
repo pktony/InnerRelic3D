@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class SettingMain : MonoBehaviour, IPointerClickHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
-    SettingManager settingManager;
+    SoundManager soundManager;
 
     CanvasGroup group;
 
@@ -32,10 +32,9 @@ public class SettingMain : MonoBehaviour, IPointerClickHandler, IBeginDragHandle
 
     private void Start()
     {// 처음 시작 초기화
-        settingManager = SettingManager.Inst;
-        SettingData data = settingManager.LoadSettingValues();
-        masterVolumeBar.fillAmount = data.masterVolume;
-        musicVolumeBar.fillAmount = data.musicVolume;
+        soundManager = SoundManager.Inst;
+        masterVolumeBar.fillAmount = soundManager.MasterVol;
+        musicVolumeBar.fillAmount = soundManager.MusicVolume;
     }
 
     private void CheckImage(PointerEventData eventData)
@@ -55,11 +54,11 @@ public class SettingMain : MonoBehaviour, IPointerClickHandler, IBeginDragHandle
     {
         if (volumeBar.CompareTag("MasterVolume"))
         {
-            settingManager.MasterVol = volumeBar.fillAmount;
+            soundManager.MasterVol = volumeBar.fillAmount;
         }
         else if (volumeBar.CompareTag("MusicVolume"))
         {
-            settingManager.MusicVolume = volumeBar.fillAmount;
+            soundManager.MusicVolume = volumeBar.fillAmount;
         }
     }
 
@@ -90,6 +89,7 @@ public class SettingMain : MonoBehaviour, IPointerClickHandler, IBeginDragHandle
         {
             volumeBar.fillAmount = volumeBar.fillAmount = (eventData.position.x - leftEndPosition) / imageWidth;
             AdjustVolume();
+            SoundManager.Inst.PlayDragSound();
         }
     }
 
