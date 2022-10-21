@@ -21,12 +21,15 @@ public class UIManager : Singleton<UIManager>
     // 인게임 -------------------------------------------------------------------
     int totalRounds;
 
+    Transform safeAreaUI;
+
     TextMeshProUGUI instructionText;
     TextMeshProUGUI[] timerTexts;
     TextMeshProUGUI maxEnemyText;
 
     TextMeshProUGUI populationText;
     Animator populationAnimator;
+
 
     Round_UI roundUI;
     InfoPanel infoPanel;
@@ -85,10 +88,11 @@ public class UIManager : Singleton<UIManager>
             //timerTexts[1].text = "Test2";
             //timerTexts[2].text = "Test3";
 
-            instructionText = roundUI.transform.GetChild(5).GetComponent<TextMeshProUGUI>();
-            populationText = roundUI.transform.GetChild(2).GetComponent<TextMeshProUGUI>();
+            safeAreaUI = roundUI.transform.GetChild(0);
+            instructionText = safeAreaUI.GetChild(5).GetComponent<TextMeshProUGUI>();
+            populationText = safeAreaUI.GetChild(2).GetComponent<TextMeshProUGUI>();
             populationAnimator = populationText.GetComponent<Animator>();
-            maxEnemyText = roundUI.transform.GetChild(3).GetComponent<TextMeshProUGUI>();
+            maxEnemyText = safeAreaUI.GetChild(3).GetComponent<TextMeshProUGUI>();
 
             gameoverUI = FindObjectOfType<GameoverUI>();
 
