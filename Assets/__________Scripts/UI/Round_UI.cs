@@ -11,9 +11,9 @@ public class Round_UI : MonoBehaviour
 
     private void Awake()
     {
-        roundText = transform.GetChild(1).GetComponent<TextMeshProUGUI>();
-        roundAnimator = transform.GetChild(1).GetComponent<Animator>();
-        victoryButtonGroup = transform.GetChild(6).GetComponent<CanvasGroup>();
+        roundText = transform.GetChild(0).GetChild(1).GetComponent<TextMeshProUGUI>();
+        roundAnimator = roundText.GetComponent<Animator>();
+        victoryButtonGroup = transform.GetChild(0).GetChild(6).GetComponent<CanvasGroup>();
     }
 
     public void ShowVictoryUI()
