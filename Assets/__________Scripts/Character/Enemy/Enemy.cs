@@ -24,11 +24,12 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
     [Header("AI")]
     [SerializeField] float detectedRange = 5.0f;
     [SerializeField] float attackRange = 1.8f;
+    private float defendProbability = 0.05f;
     private bool isDead = false;
     private bool isDefending = false;
     private bool isParry = false;
 
-    private float updateInterval = 0.5f;
+    private readonly float updateInterval = 0.5f;
     private WaitForSeconds updateSeconds;
 
     Collider[] searchColls = new Collider[2]; 
@@ -191,7 +192,11 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
         {   // 공격 사거리 내 있으면 공격 쿨타임 대기 
             LockOn();
             attackTimer += updateInterval;
-            anim.SetTrigger("onDefend");
+            float defendRandNum = UnityEngine.Random.value;
+            if(defendRandNum < defendProbability)
+            {
+                anim.SetTrigger("onDefend");
+            }
             if (attackTimer > attackCoolTime)
             { // 공격
                 int attackNum = UnityEngine.Random.Range(1, 5); // 1 2 3 4
@@ -265,8 +270,8 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
         agent.isStopped = true;
         anim.SetBool("isDead", isDead);
         anim.SetTrigger("onDie");
-        yield return new WaitForSeconds(2.0f);
         onDie?.Invoke();
+        yield return new WaitForSeconds(2.0f);
         Destroy(this.gameObject);
     }
 
