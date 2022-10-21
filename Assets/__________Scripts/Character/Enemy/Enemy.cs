@@ -13,6 +13,7 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
     public EnemyState status = EnemyState.Idle;
     Animator anim;
     NavMeshAgent agent;
+    Rigidbody rigid;
     Transform target = null;
 
     [Header("Basic Stats")]
@@ -22,15 +23,15 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
 
     [Header("AI")]
     [SerializeField] float detectedRange = 5.0f;
-    [SerializeField] float attackRange = 2.0f;
+    [SerializeField] float attackRange = 1.8f;
     private bool isDead = false;
+    private bool isDefending = false;
+    private bool isParry = false;
 
     private float updateInterval = 0.5f;
     private WaitForSeconds updateSeconds;
 
-    #region ################# PATROL
-    Transform[] waypoints;
-    #endregion
+    Collider[] searchColls = new Collider[2]; 
 
     #region ################# ATTACK
     [Header("Attack")]
@@ -40,6 +41,13 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
     Quaternion targetAngle = Quaternion.identity;
     #endregion
 
+    #region ################# KnockBack
+    private float knockbackForce = 1.0f;
+    private float knockbackDuration = 2.0f;
+    private WaitForSeconds knockbackWaitSeconds;
+    #endregion
+
+    #region IHEALTH
     public float HP
     {
         get => healthPoint;
@@ -61,18 +69,56 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
     }
 
     public float MaxHP => maxHealthPoint;
+    public Action onHealthChange { get; set; }
+    #endregion
+
+    #region IBATTLE
+    public void Attack(IBattle target)
+    {
+        if (target != null)
+        {
+            if (target.IsParry)
+            {// 공격한 사람이 넉백 
+                ParryAction();
+            }
+            target.TakeDamage(attackPower);
+        }
+    }
+
+    public void TakeDamage(float damage)
+    {
+        if (!isDefending)
+        {
+            HP -= (damage);
+        }
+        else if(isDefending)
+        {
+            HP += 0f;
+        }
+    }
+
+    public bool IsParry { get => isParry;}
+    public void ParryAction()
+    {
+        // 넉백, 잠시 기절
+        //Debug.Log($"Enemy Parried");
+        ChangeStatus(EnemyState.Knockback);
+    }
+    
+    #endregion
 
     public float AttackPower => attackPower;
-
-    public Action onHealthChange { get; set; }
     public Action onDie;
 
     private void Awake()
     {
         anim = GetComponentInChildren<Animator>();
         agent = GetComponent<NavMeshAgent>();
+        rigid = GetComponent<Rigidbody>();
+        rigid.isKinematic = true;
 
         updateSeconds = new WaitForSeconds(updateInterval);
+        knockbackWaitSeconds = new WaitForSeconds(knockbackDuration);
 
         agent.speed = moveSpeed;
         agent.stoppingDistance = attackRange;
@@ -101,7 +147,6 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
                     AttackCheck();
                     break;
                 case EnemyState.Knockback:
-
                     break;
                 case EnemyState.Die:
                     break;
@@ -146,8 +191,11 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
         {   // 공격 사거리 내 있으면 공격 쿨타임 대기 
             LockOn();
             attackTimer += updateInterval;
+            anim.SetTrigger("onDefend");
             if (attackTimer > attackCoolTime)
-            { // 공격 
+            { // 공격
+                int attackNum = UnityEngine.Random.Range(1, 5); // 1 2 3 4
+                anim.SetInteger("AttackNum", attackNum);
                 anim.SetTrigger("onAttack");
                 attackTimer = 0f;
             }
@@ -158,16 +206,33 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
         }
     }
 
+    void KnockBack()
+    {
+        anim.SetTrigger("onParried");
+        rigid.isKinematic = false;
+        Vector3 knockbackDir = transform.position - GameManager.Inst.Player_Stats.transform.position;
+        knockbackDir = knockbackDir.normalized;
+        rigid.AddForce(knockbackDir * knockbackForce, ForceMode.Impulse);
+        StartCoroutine(KnockBackTimer());
+    }
+
+    IEnumerator KnockBackTimer()
+    {
+        yield return knockbackWaitSeconds;
+        rigid.isKinematic = true;
+        ChangeStatus(EnemyState.Idle);
+    }
+
     /// <summary>
     /// Player 탐지 함수 
     /// </summary>
     /// <returns>True : 범위 내 플레이어 있음  False : 범위 내 플레이어 없음</returns>
     bool SearchPlayer()
     {
-        Collider[] colls = Physics.OverlapSphere(transform.position, detectedRange, LayerMask.GetMask("Player"));
-        if (colls.Length > 0)
+        if(Physics.OverlapSphereNonAlloc(
+            transform.position, detectedRange, searchColls, LayerMask.GetMask("Player")) > 0)
         {
-            target = colls[0].transform;
+            target = searchColls[0].transform;
             return true;
         }
         target = null;
@@ -200,25 +265,10 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
         agent.isStopped = true;
         anim.SetBool("isDead", isDead);
         anim.SetTrigger("onDie");
-        onDie?.Invoke();
         yield return new WaitForSeconds(2.0f);
+        onDie?.Invoke();
         Destroy(this.gameObject);
     }
-
-    #region IBATTLE
-    public void Attack(IBattle target)
-    {
-        if (target != null)
-        {
-            target.TakeDamage(attackPower);
-        }
-    }
-
-    public void TakeDamage(float damage)
-    {
-        HP -= damage;
-    }
-    #endregion
 
     #region On Status Entry / Exit
     void ChangeStatus(EnemyState newStatus)
@@ -250,6 +300,7 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
                 agent.isStopped = true;
                 break;
             case EnemyState.Knockback:
+                KnockBack();
                 break;
             case EnemyState.Die:
                 if(!isDead)

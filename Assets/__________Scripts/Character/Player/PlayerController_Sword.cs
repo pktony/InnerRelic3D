@@ -17,35 +17,89 @@ public class PlayerController_Sword : PlayerController
 
     private TrailRenderer[] swordTrails;
     public Transform swordParent;
+    
+    // 애니메이션 string 변수 캐싱 
+    private readonly int OnDizzy = Animator.StringToHash("onDizzy");
+    private readonly int IsSpecialAttack = Animator.StringToHash("isSpecialAttack");
+    private readonly int Attack = Animator.StringToHash("onAttack");
+    private readonly int ComboTimer = Animator.StringToHash("ComboTimer");
+    private readonly int IsDefending = Animator.StringToHash("isDefending");
 
+    #region UNITY EVENT 함수 ####################################################
     protected override void Awake()
     {
         base.Awake();
-
         // Sword 캐릭터 스킬 관련 초기화 
         spinWaitSeconds = new WaitForSeconds(1.0f);
         swordTrails = swordParent.GetComponentsInChildren<TrailRenderer>();
     }
+    #endregion
 
-    protected override void OnAttack(InputAction.CallbackContext _)
-    {
-        base.OnAttack(_);
-        if (!gameManager.Player_Stats.IsDead)
-        {
-            anim.SetTrigger("onAttack");
-            anim.SetFloat("ComboTimer", Mathf.Repeat(anim.GetCurrentAnimatorStateInfo(0).normalizedTime, 1.0f));
-        }
-    }
-
+    #region PUBLIC 함수 #########################################################
     public void PlayRandomAttackSound()
-    {// 애니메이션 이벤트 함수 
+    {// 애니메이션 이벤트 함수
         int randSound = Random.Range((int)PlayerClips.NormalAttack_Sword1, (int)PlayerClips.NoramlAttack_Sword3 + 1);
         soundManager.PlaySound_Player(audioSource, (PlayerClips)randSound);
     }
+    #endregion
 
-    protected override void OnRightClick(InputAction.CallbackContext obj)
+    #region PRIVATE 함수 ########################################################
+    private IEnumerator SpinTimer()
+    {
+        while (isSpinning)
+        {
+            spinTimer += 1.0f;
+            if (spinTimer > dizzyTime)
+            {
+                gameManager.Player_Stats.CoolTimes[(int)Skills.SpecialAttack_Sword].ResetCoolTime();
+                isDizzy = true;
+                isSpinning = false;
+                StartCoroutine(FreezeControl(2.0f));
+                spinTimer = 0f;
+                anim.SetTrigger(OnDizzy);
+                anim.SetBool(IsSpecialAttack, isSpinning);
+                audioSource.loop = false;
+            }
+            yield return spinWaitSeconds;
+        }
+    }
+    
+    private IEnumerator FreezeControl(float duration)
+    {
+        actions.Player.Disable();
+        yield return new WaitForSeconds(duration);
+        actions.Player.Enable();
+        isDizzy = false;
+    }
+    #endregion
+
+    #region PROTECTED 함수 ######################################################
+    protected override void OnAttack(InputAction.CallbackContext context)
+    {
+        base.OnAttack(context);
+        if (context.performed && !gameManager.Player_Stats.IsDead)
+        {
+            anim.SetTrigger(Attack);
+            anim.SetFloat(ComboTimer, Mathf.Repeat(anim.GetCurrentAnimatorStateInfo(0).normalizedTime, 1.0f));
+            gameManager.CamShaker.ShakeCamera(1.0f, 0.3f, CinemachineImpulseDefinition.ImpulseShapes.Bump);
+        }
+    }
+
+    protected override void OnRightClick(InputAction.CallbackContext context)
     {// 방어 스킬
-        gameManager.Player_Stats.UseInvincibleSkill();
+        if (context.performed)
+        {
+            prevControlMode = gameManager.Player_Stats.ControlMode;
+            gameManager.Player_Stats.ControlMode = ControlMode.AimMode;
+            gameManager.Player_Stats.Defend();
+            anim.SetBool(IsDefending, true);
+        }
+        else if (context.canceled)
+        {
+            gameManager.Player_Stats.ControlMode = prevControlMode;
+            gameManager.Player_Stats.UnDefend();
+            anim.SetBool(IsDefending, false);
+        }
     }
 
     protected override void OnSpecialAttack(InputAction.CallbackContext context)
@@ -71,43 +125,18 @@ public class PlayerController_Sword : PlayerController
                     if (spinTimer > dizzyTime)
                     {
                         isDizzy = true;
-                        anim.SetTrigger("onDizzy");
+                        anim.SetTrigger(OnDizzy);
                         StartCoroutine(FreezeControl(2.0f));
                         spinTimer = 0f;
                     }
                 }
                 swordTrails[0].enabled = false;
                 swordTrails[1].enabled = false;
+
+                soundManager.StopSound(audioSource);
             }
-            anim.SetBool("isSpecialAttack", isSpinning);
+            anim.SetBool(IsSpecialAttack, isSpinning);
         }
     }
-
-    private IEnumerator SpinTimer()
-    {
-        while(isSpinning)
-        {
-            spinTimer += 1.0f;
-            if(spinTimer > dizzyTime )
-            {
-                gameManager.Player_Stats.CoolTimes[(int)Skills.SpecialAttack_Sword].ResetCoolTime();
-                isDizzy = true;
-                isSpinning = false;
-                StartCoroutine(FreezeControl(2.0f));
-                spinTimer = 0f;
-                anim.SetTrigger("onDizzy");
-                anim.SetBool("isSpecialAttack", isSpinning);
-                audioSource.loop = false;
-            }    
-            yield return spinWaitSeconds;
-        }
-    }
-
-    public IEnumerator FreezeControl(float duration)
-    {
-        actions.Player.Disable();
-        yield return new WaitForSeconds(duration);
-        actions.Player.Enable();
-        isDizzy = false;
-    }
+    #endregion
 }
