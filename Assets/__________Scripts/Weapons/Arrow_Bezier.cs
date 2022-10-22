@@ -50,12 +50,17 @@ public class Arrow_Bezier : Arrow
         {
             target = _target.position + Vector3.up;
         }
+        else
+        {
+            target = GameManager.Inst.Player_Stats.transform.forward * 30f;
+            Destroy(this.gameObject, 0.3f);
+        }
         RandomBezierPoints();
     }
 
     private void RandomBezierPoints()
     {
-        bezierPoints[0] = GameManager.Inst.ArcherController.transform.position - transform.forward * 5f + Vector3.up * anchorPositionOffset + anchorPositionOffset * Random.insideUnitSphere ;
+        bezierPoints[0] = GameManager.Inst.Player_Stats.transform.position - transform.forward * 5f + Vector3.up * anchorPositionOffset + anchorPositionOffset * Random.insideUnitSphere ;
         bezierPoints[1] = target + anchorPositionOffset * Random.insideUnitSphere;
     }
 
