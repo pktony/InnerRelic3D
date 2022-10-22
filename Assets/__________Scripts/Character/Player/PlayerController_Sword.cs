@@ -59,6 +59,10 @@ public class PlayerController_Sword : PlayerController
                 anim.SetTrigger(OnDizzy);
                 anim.SetBool(IsSpecialAttack, isSpinning);
                 audioSource.loop = false;
+                audioSource.Stop();
+                swordTrails[0].enabled = false;
+                swordTrails[1].enabled = false;
+                break;
             }
             yield return spinWaitSeconds;
         }
@@ -76,12 +80,17 @@ public class PlayerController_Sword : PlayerController
     #region PROTECTED 함수 ######################################################
     protected override void OnAttack(InputAction.CallbackContext context)
     {
-        base.OnAttack(context);
         if (context.performed && !gameManager.Player_Stats.IsDead)
         {
+            prevControlMode = gameManager.Player_Stats.ControlMode;
+            gameManager.Player_Stats.ControlMode = ControlMode.AimMode;
             anim.SetTrigger(Attack);
             anim.SetFloat(ComboTimer, Mathf.Repeat(anim.GetCurrentAnimatorStateInfo(0).normalizedTime, 1.0f));
             gameManager.CamShaker.ShakeCamera(1.0f, 0.3f, CinemachineImpulseDefinition.ImpulseShapes.Bump);
+        }
+        else if (context.canceled)
+        {
+            gameManager.Player_Stats.ControlMode = prevControlMode;
         }
     }
 
@@ -107,11 +116,11 @@ public class PlayerController_Sword : PlayerController
         if (gameManager.Player_Stats.CoolTimes[(int)Skills.SpecialAttack_Sword].IsReadyToUse()
             && !gameManager.Player_Stats.IsDead)
         {
-            swordTrails[0].enabled = true;
-            swordTrails[1].enabled = true;
             if (context.performed)
-            {// Charging 애니메이션까지는 자동으로 넘어간다
+            {
                 isSpinning = true;
+                swordTrails[0].enabled = true;
+                swordTrails[1].enabled = true;
                 StartCoroutine(SpinTimer());
                 soundManager.PlaySound_Player(audioSource, PlayerClips.SpecialAttack_Demacia);
                 soundManager.PlaySound_Player(audioSource, PlayerClips.SpecialAttack_Sword, true);
@@ -121,19 +130,12 @@ public class PlayerController_Sword : PlayerController
                 if (!isDizzy)
                 {
                     isSpinning = false;
-                    gameManager.Player_Stats.CoolTimes[(int)Skills.SpecialAttack_Sword].ResetCoolTime();
-                    if (spinTimer > dizzyTime)
-                    {
-                        isDizzy = true;
-                        anim.SetTrigger(OnDizzy);
-                        StartCoroutine(FreezeControl(2.0f));
-                        spinTimer = 0f;
-                    }
                 }
+                gameManager.Player_Stats.CoolTimes[(int)Skills.SpecialAttack_Sword].ResetCoolTime();
                 swordTrails[0].enabled = false;
                 swordTrails[1].enabled = false;
-
-                soundManager.StopSound(audioSource);
+                audioSource.Stop();
+                spinTimer = 0f;
             }
             anim.SetBool(IsSpecialAttack, isSpinning);
         }
