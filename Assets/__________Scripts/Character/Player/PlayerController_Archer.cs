@@ -99,9 +99,11 @@ public class PlayerController_Archer : PlayerController
             chargeCount += perCount;
             //Debug.Log(chargeCount);
 
-            // 파티클
+            // 파티클 + 사운드 
             gameManager.Player_Stats.Particles[2].transform.localPosition = transform.up;
             gameManager.Player_Stats.Particles[2].SetActive(true);
+            soundManager.PlaySound_Player(audioSource, PlayerClips.ArcherCharge);
+            gameManager.CamShaker.ShakeCamera(1.0f, 0.3f, Cinemachine.CinemachineImpulseDefinition.ImpulseShapes.Rumble);
             yield return chargeWaitSeconds;
         }
     }
