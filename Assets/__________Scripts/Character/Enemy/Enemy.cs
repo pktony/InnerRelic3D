@@ -10,11 +10,15 @@ using UnityEditor;
 
 public class Enemy : MonoBehaviour, IHealth, IBattle
 {
+    SoundManager soundManager;
+
     public EnemyState status = EnemyState.Idle;
     Animator anim;
     NavMeshAgent agent;
     Rigidbody rigid;
     Transform target = null;
+    Material mat;
+    AudioSource audioSource;
 
     [Header("Basic Stats")]
     float healthPoint = 100f;
@@ -31,6 +35,8 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
 
     private readonly float updateInterval = 0.5f;
     private WaitForSeconds updateSeconds;
+    private readonly float blinktime = 0.2f;
+    private WaitForSeconds blinkWaitSeconds;
 
     Collider[] searchColls = new Collider[2]; 
 
@@ -91,11 +97,13 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
         if (!isDefending)
         {
             HP -= (damage);
+            StartCoroutine(HitBlink());
         }
         else if(isDefending)
         {
             HP += 0f;
         }
+        soundManager.PlaySound_Enemy(audioSource, EnemyClip.Hit);
     }
 
     public bool IsParry { get => isParry;}
@@ -111,15 +119,20 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
     public float AttackPower => attackPower;
     public Action onDie;
 
+    #region UNITY EVENT 함수 ###################################################
     private void Awake()
     {
         anim = GetComponentInChildren<Animator>();
         agent = GetComponent<NavMeshAgent>();
         rigid = GetComponent<Rigidbody>();
         rigid.isKinematic = true;
+        SkinnedMeshRenderer mesh = GetComponentInChildren<SkinnedMeshRenderer>();
+        mat = mesh.material;
+        audioSource = GetComponent<AudioSource>();
 
         updateSeconds = new WaitForSeconds(updateInterval);
         knockbackWaitSeconds = new WaitForSeconds(knockbackDuration);
+        blinkWaitSeconds = new WaitForSeconds(blinktime);
 
         agent.speed = moveSpeed;
         agent.stoppingDistance = attackRange;
@@ -127,11 +140,14 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
 
     private void Start()
     {
+        soundManager = SoundManager.Inst;
         ChangeStatus(EnemyState.Idle);
 
         StartCoroutine(StatusCheck());
     }
+    #endregion
 
+    #region PRIVATE 함수 ########################################################
     IEnumerator StatusCheck()
     {
         while (!isDead)
@@ -211,6 +227,12 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
         }
     }
 
+    private IEnumerator HitBlink()
+    {
+        mat.SetColor("_EmissionColor", Color.white);
+        yield return blinkWaitSeconds;
+        mat.SetColor("_EmissionColor", Color.black);
+    }
     void KnockBack()
     {
         anim.SetTrigger("onParried");
@@ -259,11 +281,6 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
         transform.rotation = Quaternion.LookRotation(target.position - transform.position);
     }
 
-    public void InstantKill()
-    {
-        ChangeStatus(EnemyState.Die);
-    }
-
     IEnumerator DieProcess()
     {
         isDead = true;
@@ -271,7 +288,8 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
         anim.SetBool("isDead", isDead);
         anim.SetTrigger("onDie");
         onDie?.Invoke();
-        gameObject.layer = LayerMask.NameToLayer("Default");
+        gameObject.layer = LayerMask.NameToLayer("Default");    // 타겟 락 방지
+        soundManager.PlaySound_Enemy(audioSource, EnemyClip.Die);
         yield return new WaitForSeconds(2.0f);
         Destroy(this.gameObject);
     }
@@ -318,6 +336,15 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
         status = newStatus;
     }
     #endregion
+    #endregion
+
+    #region PUBLIC 함수 ################################################
+    public void InstantKill()
+    {
+        ChangeStatus(EnemyState.Die);
+    }
+    #endregion ########################################################
+
 
 #if UNITY_EDITOR
     private void OnDrawGizmos()
