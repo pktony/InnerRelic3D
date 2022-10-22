@@ -20,8 +20,8 @@ public class PanelResizer : MonoBehaviour
 
     private float WINDOWSIZE_ERROR_X;
     private float WINDOWSIZE_ERROR_Y;
-    private float speed_X = 500f;
-    private float speed_Y = 1500f;
+    [SerializeField] private float speed_X = 500f;
+    [SerializeField] private float speed_Y = 1500f;
 
     private void Awake()
     {

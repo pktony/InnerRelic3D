@@ -45,7 +45,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isDontDestroy: 0
-  roundTimer: []
-  isRoundOver: 0
-  isGameOver: 0
   maxRoundTime: 180

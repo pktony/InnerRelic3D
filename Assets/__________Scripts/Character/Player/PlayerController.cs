@@ -9,6 +9,9 @@ using UnityEngine.SceneManagement;
 using UnityEditor;
 #endif
 
+/// <summary>
+/// 플레이어 컨트롤러 부모 클래스
+/// </summary>
 public abstract class PlayerController : MonoBehaviour
 {
     protected GameManager gameManager;
@@ -18,6 +21,7 @@ public abstract class PlayerController : MonoBehaviour
     protected Animator anim;
     protected CharacterController controller;
     protected AudioSource audioSource;
+    private AudioSource footstepAudio;
     
     protected ControlMode prevControlMode;
 
@@ -30,32 +34,42 @@ public abstract class PlayerController : MonoBehaviour
     [SerializeField] float walkSpeed = 3.0f;
 
     // ################### Look ########################
-    Vector3 keyboardInputDirection = Vector3.zero;
-    Vector2 lookDir = Vector2.zero;
+    private Vector3 keyboardInputDirection = Vector3.zero;
+    private Vector2 lookDir = Vector2.zero;
     [SerializeField] float turnSpeed = 15f;
 
     // ################### Jump ########################
     private bool isGrounded = true;
-    private float jumpHeight = 5.0f;
-    private uint jumpCounter = 0;
+    private int jumpCounter = 0;
+    private float jumpHeight = 7f;
     private Vector3 jumpVector;
     private Vector3 gravity;
+    private float fallMultiplier = 1f;
 
     // ################ Weapon Change
-    PlayerWeapons playerWeapon;
+    private PlayerWeapons playerWeapon;
+    
+    // ################ 애니메이션 String 변수 캐싱 
+    private readonly int OnJump = Animator.StringToHash("onJump");
+    private readonly int IsOnAir = Animator.StringToHash("isOnAir");
+    private readonly int FlipJump = Animator.StringToHash("FlipJump");
+    private readonly int OnHeal = Animator.StringToHash("onHeal");
+    private readonly int Speed = Animator.StringToHash("Speed");
+    private readonly int IsDead = Animator.StringToHash("isDead");
 
     // ################## Properties #####################
     public Vector3 LookDir => lookDir;
 
-
+    #region UNITY EVENT 함수 ###################################################
     protected virtual void Awake()
     {
         // 컴포넌트 --------------------------
         actions = new();
         controller = GetComponentInParent<CharacterController>();
-        audioSource = GetComponentInParent<AudioSource>();
+        audioSource = transform.parent.GetComponent<AudioSource>();
+        footstepAudio = GetComponent<AudioSource>();
         anim = GetComponent<Animator>();
-        anim.SetBool("isDead", false);
+        anim.SetBool(IsDead, false);
 
         // 기타 --------------------------
         gravity = Physics.gravity;
@@ -70,7 +84,7 @@ public abstract class PlayerController : MonoBehaviour
     }
 
     private void OnEnable()
-    {
+    { // Input system 바인딩 활성화 / 등록 
         actions.Enable();
         actions.Player.Move.performed += OnMoveInput;
         actions.Player.Move.canceled += OnMoveInput;
@@ -87,7 +101,7 @@ public abstract class PlayerController : MonoBehaviour
     }
 
     private void OnDisable()
-    {
+    { // Input System 바인딩 비활성화 / 등록 해제 
         actions.Player.SpecialAttack.performed -= OnSpecialAttack;
         actions.Player.SpecialAttack.canceled -= OnSpecialAttack;
         actions.Player.Heal.performed -= Heal_Performed;
@@ -105,11 +119,11 @@ public abstract class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        if (!gameManager.Player_Stats.IsDead && !isAttacking)
+        if (!gameManager.Player_Stats.IsDead)
         {
             Move_Turn();
 
-            jumpVector += gravity * Time.deltaTime;
+            jumpVector += fallMultiplier * Time.deltaTime * gravity;
             controller.Move(jumpVector * Time.deltaTime);
             isGrounded = controller.isGrounded;
 
@@ -117,9 +131,18 @@ public abstract class PlayerController : MonoBehaviour
             {
                 anim.SetBool("isOnAir", false);
                 jumpCounter = 0;
+                fallMultiplier = 1.0f;
+            }
+            else
+            {
+                if(controller.velocity.y < 0f)
+                {
+                    fallMultiplier = 4.0f;
+                }
             }
         }
     }
+    #endregion
 
     private void Move_Turn()
     {
@@ -127,27 +150,28 @@ public abstract class PlayerController : MonoBehaviour
         {
             moveDir = keyboardInputDirection;
 
+            Transform parent = transform.parent;
             switch (gameManager.Player_Stats.ControlMode)
             {
                 case ControlMode.Normal:
                     // 플레이어가 카메라를 기준으로 방향을 결정한다 
-                    transform.parent.rotation = Quaternion.RotateTowards(transform.parent.rotation,
+                    parent.rotation = Quaternion.RotateTowards(parent.rotation,
                         relativeMoveDir, turnSpeed);
                     break;
                 case ControlMode.AimMode:
                     // 움직일 수 없고 회전만 가능하다 
                     moveDir = Vector3.zero;
-                    transform.parent.rotation = Quaternion.RotateTowards(transform.parent.rotation,
+                    parent.rotation = Quaternion.RotateTowards(parent.rotation,
                         relativeMoveDir, turnSpeed);
                     break;
                 case ControlMode.LockedOn:
-                    // 플레이어가 락온된 상대를 바라보며 카메라를 기준으로 움직인
+                    // 플레이어가 락온된 상대를 바라보며 카메라를 기준으로 움직인다 
                     if (gameManager.Player_Stats.LockonTarget != null)
                     {
                         relativeMoveDir = Quaternion.LookRotation(
-                            gameManager.Player_Stats.LockonTarget.position - transform.parent.position, Vector3.up);
-                        transform.parent.rotation = Quaternion.RotateTowards(
-                            transform.parent.rotation, relativeMoveDir, turnSpeed);
+                            gameManager.Player_Stats.LockonTarget.position - parent.position, Vector3.up);
+                        parent.rotation = Quaternion.RotateTowards(
+                            parent.rotation, relativeMoveDir, turnSpeed);
                         moveDir = relativeMoveDir * moveDir;
                     }
                     break;
@@ -163,30 +187,24 @@ public abstract class PlayerController : MonoBehaviour
             Vector3 inputDir = context.ReadValue<Vector2>();
             keyboardInputDirection = new Vector3(inputDir.x, 0, inputDir.y);
             //-------------------------
-            if (keyboardInputDirection.sqrMagnitude > 0)
-            {
-                moveSpeed = walkSpeed * inputDir.normalized.sqrMagnitude;
-            }
-            else
-            {
-                moveSpeed = 0f;
-            }
+            moveSpeed = keyboardInputDirection.sqrMagnitude > 0 ?
+                walkSpeed * inputDir.normalized.sqrMagnitude : 0f;
             // ------------------------
 
             if (gameManager.Player_Stats.ControlMode != ControlMode.LockedOn)
             {
-                keyboardInputDirection = Quaternion.Euler(0, Camera.main.transform.rotation.eulerAngles.y, 0) * keyboardInputDirection;
+                keyboardInputDirection = Quaternion.Euler(0, Camera.main!.transform.rotation.eulerAngles.y, 0) * keyboardInputDirection;
                 if (keyboardInputDirection.sqrMagnitude > 0)
                 {
                     relativeMoveDir = Quaternion.LookRotation(keyboardInputDirection, Vector3.up);
                 }
             }
 
-            anim.SetFloat("Speed", moveSpeed);
+            anim.SetFloat(Speed, moveSpeed);
         }
     }
 
-    protected virtual void OnAttack(InputAction.CallbackContext _) { isAttacking = true; }
+    protected virtual void OnAttack(InputAction.CallbackContext _) { }
     protected virtual void OnRightClick(InputAction.CallbackContext _) { }
     protected virtual void OnSpecialAttack(InputAction.CallbackContext _) { }
 
@@ -194,7 +212,7 @@ public abstract class PlayerController : MonoBehaviour
     {
         if (!gameManager.Player_Stats.IsDead)
         {
-            anim.SetTrigger("onHeal");
+            anim.SetTrigger(OnHeal);
             gameManager.Player_Stats.Heal();
 
             soundManager.PlaySound_Player(audioSource, PlayerClips.Heal);
@@ -207,22 +225,18 @@ public abstract class PlayerController : MonoBehaviour
     }
 
     private void OnWeaponChange(InputAction.CallbackContext _)
-    {
+    {// 무기 변경 함수 
         if (!gameManager.Player_Stats.IsDead)
         {
             if (Keyboard.current.digit1Key.wasPressedThisFrame || Gamepad.current.leftShoulder.wasPressedThisFrame)
             {// Sword 로 변경 
                 playerWeapon.SwitchWeapon(Weapons.Sword);
+                gameManager.Player_Stats.SetWeapon(Weapons.Sword);
             }
             else if (Keyboard.current.digit2Key.wasPressedThisFrame || Gamepad.current.rightShoulder.wasPressedThisFrame)
             {// Archer 로 변경 
                 playerWeapon.SwitchWeapon(Weapons.Bow);
-            }
-
-            if (gameManager.Player_Stats.LockonTarget != null)
-            {
-                gameManager.Player_Stats.LockOff();
-                gameManager.Player_Stats.TargetLock();
+                gameManager.Player_Stats.SetWeapon(Weapons.Bow);
             }
         }
     }
@@ -231,33 +245,36 @@ public abstract class PlayerController : MonoBehaviour
     {
         if (isGrounded && !gameManager.Player_Stats.IsDead)
         {
-            Jump();
-            soundManager.PlaySound_Player(audioSource, PlayerClips.Jump);
+            Jump(jumpCounter);
             jumpCounter++;
+            soundManager.PlaySound_Player(audioSource, PlayerClips.Jump);
             return;
         }
 
-        if (!isGrounded && jumpCounter > 0)
-        {
-            if (jumpCounter < 3 && actions.Player.Jump.triggered)
-            {
-                jumpCounter++;
-                anim.SetTrigger("FlipJump");
-                Jump();
-                soundManager.PlaySound_Player(audioSource, PlayerClips.DoubleJump);
-            }
+        if (!isGrounded && jumpCounter < 2)
+        {// 공중에 있고 점프 카운터가 1 이상일 때만 실행 
+            Jump(jumpCounter);
+            jumpCounter++;
+            soundManager.PlaySound_Player(audioSource, PlayerClips.DoubleJump);
         }
     }
 
-    void Jump()
+    private void Jump(int jumpCount)
     {
         jumpVector.y = jumpHeight;
-        anim.SetTrigger("onJump");
-        anim.SetBool("isOnAir", true);
+        anim.SetBool(IsOnAir, true);
+        if(jumpCount == 0)
+        {
+            anim.SetTrigger(OnJump);
+        }
+        else
+        {
+            anim.SetTrigger(FlipJump);
+        }
     }
 
-    public void SetNotAttacking()
-    {// 애니메이션 이벤트 함수 
-        isAttacking = false;
+    public void PlayFootstepSound()
+    {
+        soundManager.PlaySound_Player(footstepAudio, PlayerClips.Footstep);
     }
 }

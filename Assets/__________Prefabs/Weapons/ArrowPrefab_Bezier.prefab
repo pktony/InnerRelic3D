@@ -62,7 +62,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: f9e8a256b2e009743bcefbdabbb05382, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -493,8 +493,20 @@ PrefabInstance:
     m_TransformParent: {fileID: 7321715217703387392}
     m_Modifications:
     - target: {fileID: 4107369663467327278, guid: 98d37577afd0240268d3064ac8232376, type: 3}
-      propertyPath: InitialModule.startSize.scalar
-      value: 0.05
+      propertyPath: looping
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4107369663467327278, guid: 98d37577afd0240268d3064ac8232376, type: 3}
+      propertyPath: InitialModule.startColor.maxColor.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4107369663467327278, guid: 98d37577afd0240268d3064ac8232376, type: 3}
+      propertyPath: InitialModule.startColor.maxColor.g
+      value: 0.13102727
+      objectReference: {fileID: 0}
+    - target: {fileID: 4107369663467327278, guid: 98d37577afd0240268d3064ac8232376, type: 3}
+      propertyPath: InitialModule.startColor.maxColor.r
+      value: 0.7075472
       objectReference: {fileID: 0}
     - target: {fileID: 4107369663480993358, guid: 98d37577afd0240268d3064ac8232376, type: 3}
       propertyPath: m_Name

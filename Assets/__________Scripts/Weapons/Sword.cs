@@ -8,7 +8,6 @@ public class Sword : MonoBehaviour
     {
         if (other.CompareTag("Enemy"))
         {
-            //Debug.Log(other.name);
             if (other.TryGetComponent<IBattle>(out var target))
             {// Enemy의 Ibattle
                 GameManager.Inst.Player_Stats.Attack(target);

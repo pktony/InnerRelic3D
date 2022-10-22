@@ -15,5 +15,4 @@ public class LockOnFollowTarget : MonoBehaviour
         if(lockonCam.isActiveAndEnabled)
             transform.localPosition = GameManager.Inst.Player_Stats.GetTargetDirection() + offset;
     }
-
 }

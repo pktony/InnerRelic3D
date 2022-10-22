@@ -2,6 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
+/// <summary>
+/// Enums 모음집
+/// </summary>
 enum PlayerState : byte
 {
     Walk = 0,
@@ -60,6 +64,7 @@ public enum UIClips : byte
     InfoPop,
     Victory,
     TimeTicking,
+    Fanfare,
 }
 
 public enum PlayerClips : byte
@@ -71,6 +76,8 @@ public enum PlayerClips : byte
     SpecialAttack_Sword,
     SpecialAttack_Demacia,
     SpecialAttack_Arhcer,
+    SpecialAttack_Bezier,
+    ArcherCharge,
     Defence,
     Dodge,
     Lockon,
@@ -83,8 +90,14 @@ public enum PlayerClips : byte
     Jump,
     DoubleJump,
     Heal,
+    Footstep,
 }
 
 public enum EnemyClip : byte
 {
+    Hit = 0,
+    Die,
+    Attack1,
+    Attack2,
+    Attack3
 }

@@ -31,11 +31,17 @@ public class SettingManager : Singleton<SettingManager>
         rankData = new();
         scores = new float[rankCount];
         SceneManager.sceneLoaded += Initialize;
+
+        Application.targetFrameRate = 30;
     }
 
     private void Initialize(Scene arg0, LoadSceneMode arg1)
     {
-        settingData = LoadSettingValues();
+        if(!LoadSettingValues())
+        {
+            SaveSettingValues();
+            LoadSettingValues();
+        }    
         SoundManager.Inst.MasterVol = settingData.masterVolume;
         SoundManager.Inst.MusicVolume = settingData.musicVolume;
 
@@ -68,21 +74,25 @@ public class SettingManager : Singleton<SettingManager>
         print("저장 완료");
     }
 
-    public SettingData LoadSettingValues()
+    public bool LoadSettingValues()
     {
+        bool result = false;
+
         string filePath = $"{Application.persistentDataPath}/{settingSaveFileName}";
+        Debug.Log(filePath);
         if (File.Exists(filePath))
         {// 이미 있으면
             // 저장된 파일 읽어오고 Json을 클래스 형식으로 전환
             string FromJsonData = File.ReadAllText(filePath);
             settingData = JsonUtility.FromJson<SettingData>(FromJsonData);
-            print("불러오기 완료");
-            return settingData;
+            //print("불러오기 완료");
+            result = true;
+            return result;
         }
         else
         {
             print("불러오기 실패");
-            return null;
+            return result;
         }
     }
 
@@ -104,7 +114,7 @@ public class SettingManager : Singleton<SettingManager>
 
         // 파일 생성 
         File.WriteAllText(filePath, ToJsonData);
-        print("랭킹 저장 완료");
+        //print("랭킹 저장 완료");
     }
 
     public RankData LoadRankDatas()
@@ -114,14 +124,14 @@ public class SettingManager : Singleton<SettingManager>
         {// 이미 있으면
             string FromJsonData = File.ReadAllText(filePath);
             rankData = JsonUtility.FromJson<RankData>(FromJsonData);
-            print("랭킹 불러오기 완료");
+            //print("랭킹 불러오기 완료");
             return rankData;
         }
         else
         {
             rankData.scores = scores;
             SaveGameRank();
-            print("랭킹 기록 없음 ");
+            //print("랭킹 기록 없음 ");
             return rankData;
         }
     }
@@ -141,6 +151,7 @@ public class SettingManager : Singleton<SettingManager>
                 scores[i] = newScore;
                 SaveGameRank();
                 UIManager.Inst.InfoPanel.ShowPanel("New High Score !");
+                SoundManager.Inst.PlaySound_UI(UIClips.Fanfare);
                 break;
             }
             else
