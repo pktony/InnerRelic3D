@@ -271,6 +271,7 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
         anim.SetBool("isDead", isDead);
         anim.SetTrigger("onDie");
         onDie?.Invoke();
+        gameObject.layer = LayerMask.NameToLayer("Default");
         yield return new WaitForSeconds(2.0f);
         Destroy(this.gameObject);
     }
