@@ -98,12 +98,12 @@ CharacterController:
   m_Enabled: 1
   serializedVersion: 2
   m_Height: 2.5
-  m_Radius: 0.5
+  m_Radius: 0.8
   m_SlopeLimit: 45
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0
-  m_Center: {x: 0, y: 1.2, z: 0}
+  m_Center: {x: 0, y: 1.23, z: 0}
 --- !u!114 &330286963062712821
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -116,7 +116,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc086785140594547aa3d25d12477f21, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  attackPower: 100
+  attackPower: 10
+  lockOnRadius: 20
   skillDatas:
   - {fileID: 11400000, guid: 5a94ecd8abc7b4d169036a4fdafde108, type: 2}
   - {fileID: 11400000, guid: e1553f36de961450e8d730b8c0539f68, type: 2}
@@ -248,7 +249,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8720535228904178923, guid: 095fd43ad04a7044385b86215a18f1d6, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -9.597449
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8720535228904178923, guid: 095fd43ad04a7044385b86215a18f1d6, type: 3}
       propertyPath: m_LocalPosition.y
@@ -256,7 +257,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8720535228904178923, guid: 095fd43ad04a7044385b86215a18f1d6, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.6823017
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8720535228904178923, guid: 095fd43ad04a7044385b86215a18f1d6, type: 3}
       propertyPath: m_LocalRotation.w
@@ -424,18 +425,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 7803333997088277340}
     m_Modifications:
-    - target: {fileID: 4395970979772970750, guid: f3c88f4f49fa743a083abb400aa938cf, type: 3}
-      propertyPath: InitialModule.startSize.scalar
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 4395970979772970750, guid: f3c88f4f49fa743a083abb400aa938cf, type: 3}
-      propertyPath: InitialModule.startLifetime.scalar
-      value: 0.6
-      objectReference: {fileID: 0}
-    - target: {fileID: 4395970979772970750, guid: f3c88f4f49fa743a083abb400aa938cf, type: 3}
-      propertyPath: InitialModule.startColor.maxColor.a
-      value: 0.6117647
-      objectReference: {fileID: 0}
     - target: {fileID: 4395970979791319998, guid: f3c88f4f49fa743a083abb400aa938cf, type: 3}
       propertyPath: m_RootOrder
       value: 3

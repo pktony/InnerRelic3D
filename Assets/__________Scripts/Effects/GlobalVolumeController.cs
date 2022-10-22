@@ -17,19 +17,9 @@ public class GlobalVolumeController : MonoBehaviour
         volume.profile.TryGet<ColorAdjustments>(out colorChanger);
     }
 
-    private void Update()
-    {
-        if (Keyboard.current.digit4Key.wasPressedThisFrame)
-        {
-            Debug.Log("Color Change");
-            ChangeSaturation();
-        }
-    }
-
     public void ChangeSaturation()
     {
         colorChanger.saturation.overrideState = true;
-        //colorChanger.saturation.value = -100f;
         StartCoroutine(MakeGray());
     }
 

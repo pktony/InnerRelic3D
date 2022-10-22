@@ -18,13 +18,8 @@ public class Player_UI : MonoBehaviour
         player = FindObjectOfType<PlayerStats>();
         player.onHealthChange += RefreshHPUI;
 
-        hpImg = transform.GetChild(0).GetChild(0).GetComponent<Image>();
-        hpText = transform.GetChild(0).GetChild(2).GetComponent<TextMeshProUGUI>();
-    }
-
-    private void Start()
-    {
-        RefreshHPUI();
+        hpImg = transform.GetChild(0).GetComponent<Image>();
+        hpText = transform.GetChild(2).GetComponent<TextMeshProUGUI>();
     }
 
     private void RefreshHPUI()

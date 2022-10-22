@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Boxophobic.Utils;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -88,8 +87,31 @@ public class SoundManager : Singleton<SoundManager>
             _audioSource.clip = playerClips[(int)clip];
             _audioSource.volume = masterVolume;
             _audioSource.Play();
-        }    
-        
+        }
+    }
+
+    public void PlaySound_Enemy(AudioSource _audioSource, EnemyClip clip, bool isLoop = false)
+    {
+        if (_audioSource == null)
+            _audioSource = audioSource;
+
+        if (!isLoop)
+            _audioSource.PlayOneShot(enemyClips[(int)clip], masterVolume);
+        else
+        {
+            _audioSource.loop = true;
+            _audioSource.clip = enemyClips[(int)clip];
+            _audioSource.volume = masterVolume;
+            _audioSource.Play();
+        }
+    }
+
+    public void StopSound(AudioSource audioSource = null)
+    {
+        if (audioSource == null)
+            audioSource = this.audioSource;
+        audioSource.Stop();
+        audioSource.loop = false;
     }
 
     public float GetMusicVolume() => masterVolume * musicVolume;

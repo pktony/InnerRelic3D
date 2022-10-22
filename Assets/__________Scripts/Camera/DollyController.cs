@@ -29,6 +29,7 @@ public class DollyController : MonoBehaviour
     {
         dollyCart.m_Position = 0f;
         controlUI.transform.parent.gameObject.SetActive(false);
+        //UIManager.Inst.RoundUI.gameObject.SetActive(false);
 
         StartCoroutine(Intro());
     }
@@ -43,6 +44,7 @@ public class DollyController : MonoBehaviour
                 mainCam.gameObject.SetActive(true);
                 GameManager.Inst.Player_Stats.gameObject.SetActive(true);
                 controlUI.transform.parent.gameObject.SetActive(true);
+                UIManager.Inst.RoundUI.gameObject.SetActive(true);
 
                 onIntroEnd?.Invoke();
                 break;

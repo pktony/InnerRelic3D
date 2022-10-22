@@ -40,10 +40,10 @@ public class SpawnerController : MonoBehaviour
 
     private void Update()
     {// TEST
-        if(Keyboard.current.digit3Key.wasPressedThisFrame)
-        {
-            InstantKillAllEnemies(0);
-        }
+        //if(Keyboard.current.digit3Key.wasPressedThisFrame)
+        //{
+        //    InstantKillAllEnemies(0);
+        //}
     }
 
     private void StartChecking()

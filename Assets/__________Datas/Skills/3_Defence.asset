@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   coolTime: 30
   skillParticles:
-  - {fileID: 2755892042585956580, guid: 1e7576653b0f842f8885eab2b884a6a6, type: 3}
+  - {fileID: 100004, guid: 64a7c34c5cac44fedbb9f3f828b81a61, type: 3}

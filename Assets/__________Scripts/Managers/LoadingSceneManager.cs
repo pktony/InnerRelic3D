@@ -28,7 +28,7 @@ public class LoadingSceneManager : MonoBehaviour
     public static void LoadScene(string _nextScene)
     {
         nextScene = _nextScene;
-        SceneManager.LoadScene("LoadingScene");
+        SceneManager.LoadScene("Stage");
     }
 
     IEnumerator LoadScene()

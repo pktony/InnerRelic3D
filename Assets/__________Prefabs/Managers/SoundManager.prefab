@@ -55,15 +55,19 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 2a492e2a68cf4754a9133989108ef297, type: 3}
   - {fileID: 8300000, guid: afff554d9032a4bbc955576f8a715300, type: 3}
   - {fileID: 8300000, guid: 933f8a00455df4654b5b69bda20d0d7d, type: 3}
+  - {fileID: 8300000, guid: a13cc5a0dfadf4cd6931b67846a01ee4, type: 3}
+  - {fileID: 8300000, guid: 9f67fcb39de7042aeab216ec0939f563, type: 3}
   playerClips:
   - {fileID: 8300000, guid: c53daf8f327074155a5a5e36c86e5979, type: 3}
   - {fileID: 8300000, guid: 3c37e87e6d84e435d824f7269b5768fd, type: 3}
   - {fileID: 8300000, guid: d08dcc9c8ab5440739df5f467a8509be, type: 3}
-  - {fileID: 0}
+  - {fileID: 8300000, guid: dbb1b6472d29049bdacf168b6bd5ae5f, type: 3}
   - {fileID: 8300000, guid: 3484f5ab033d9403f9109167ddd3581e, type: 3}
   - {fileID: 8300000, guid: e1f6c9a36bd1e4a3e915a8f95c7b5e58, type: 3}
+  - {fileID: 8300000, guid: dbb1b6472d29049bdacf168b6bd5ae5f, type: 3}
   - {fileID: 8300000, guid: 2975a96c288c54e4d8b5784475e55255, type: 3}
-  - {fileID: 0}
+  - {fileID: 8300000, guid: 37119951e519a413d9d5f169b7acd634, type: 3}
+  - {fileID: 8300000, guid: d355593037307479295a980da9bf9f0d, type: 3}
   - {fileID: 0}
   - {fileID: 8300000, guid: 82fa869477e424404a29a9cf2fe182fd, type: 3}
   - {fileID: 8300000, guid: a5e3d289dbcf742ee93545b2f60daaed, type: 3}
@@ -75,7 +79,13 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 168487ee0d2c144f69d9598b196ad145, type: 3}
   - {fileID: 8300000, guid: c2d14374775964b7396f68c3a5a323c3, type: 3}
   - {fileID: 8300000, guid: 07d2e1e3c004c442ba2f187cdcfc7cdb, type: 3}
-  enemyClips: []
+  - {fileID: 8300000, guid: 1f11327fe7c91402fad9d43749355b94, type: 3}
+  enemyClips:
+  - {fileID: 8300000, guid: bb876d21d7e12441bb369774aabb6b26, type: 3}
+  - {fileID: 8300000, guid: ffc69195504704180ab327dcf9265df5, type: 3}
+  - {fileID: 8300000, guid: eee5ad605194d4ca6857a5538bd14ec7, type: 3}
+  - {fileID: 8300000, guid: 7d6b6254e4f584981ac1d24921da2bc4, type: 3}
+  - {fileID: 8300000, guid: e626af0011d3545ff9df90c2cd347493, type: 3}
 --- !u!82 &6573761249352141167
 AudioSource:
   m_ObjectHideFlags: 0
