@@ -1,10 +1,10 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.IO;
 
+/// <summary>
+/// 사운드 설정, 랭킹 관련 정보를 관리하는 매니저
+/// </summary>
 public class SettingManager : Singleton<SettingManager>
 {
     private PanelResizer panel;
@@ -12,10 +12,10 @@ public class SettingManager : Singleton<SettingManager>
 
     // Save 관련 -------------------------------------------
     // Setting
-    private string settingSaveFileName = "SettingData.json";
+    private readonly string settingSaveFileName = "SettingData.json";
     private SettingData settingData = new();
     // Rank
-    private string rankSaveFileName = "RankData.json";
+    private readonly string rankSaveFileName = "RankData.json";
     private RankData rankData;
     private LeaderBoard_Home board_Home;
     private LeaderBoard_InGame board_InGame;
@@ -38,7 +38,7 @@ public class SettingManager : Singleton<SettingManager>
     private void Initialize(Scene arg0, LoadSceneMode arg1)
     {
         if(!LoadSettingValues())
-        {
+        {// 최초 로드데이터가 없으면 새로 저장 후 불러오기
             SaveSettingValues();
             LoadSettingValues();
         }    
@@ -74,7 +74,7 @@ public class SettingManager : Singleton<SettingManager>
         print("저장 완료");
     }
 
-    public bool LoadSettingValues()
+    private bool LoadSettingValues()
     {
         bool result = false;
 
@@ -150,6 +150,7 @@ public class SettingManager : Singleton<SettingManager>
                 }
                 scores[i] = newScore;
                 SaveGameRank();
+                UIManager.Inst.LeaderBoard_InGame.RefreshLeaderBoard();
                 UIManager.Inst.InfoPanel.ShowPanel("New High Score !");
                 SoundManager.Inst.PlaySound_UI(UIClips.Fanfare);
                 break;

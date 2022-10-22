@@ -13,6 +13,10 @@ public class Singleton<T> : MonoBehaviour where T : Component
 
     public bool isDontDestroy = false;
 
+    /// <summary>
+    /// 인스턴스가 없으면 먼저 찾아보고
+    /// 그래도 없으면 새로운 게임오브젝트 생성 
+    /// </summary>
     public static T Inst
     {
         get
@@ -40,7 +44,7 @@ public class Singleton<T> : MonoBehaviour where T : Component
         if (instance == null)
         {
             T obj = this as T;
-            if (isDontDestroy)
+            if (isDontDestroy)  // True 일때만 DontDestroy
                 DontDestroyOnLoad(this.gameObject);
         }
         else

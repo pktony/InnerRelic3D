@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 71c1514a6bd24e1e882cebbe1904ce04, type: 3}
   m_Name: Bubblegum SDF_Enemies
   m_EditorClassIdentifier: 
-  hashCode: -297201784
+  hashCode: -1798110669
   material: {fileID: 1474096787706796580}
-  materialHashCode: -772895192
+  materialHashCode: -2011731917
   m_Version: 1.1.0
   m_SourceFontFileGUID: 71eb0966a1a9342b6bbc29a5e6184880
   m_SourceFontFile_EditorRef: {fileID: 12800000, guid: 71eb0966a1a9342b6bbc29a5e6184880, type: 3}

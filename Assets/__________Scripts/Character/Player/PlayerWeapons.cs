@@ -1,7 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using Cinemachine;
-using Cinemachine.Utility;
 using UnityEngine;
 
 public class PlayerWeapons : MonoBehaviour
@@ -10,9 +8,8 @@ public class PlayerWeapons : MonoBehaviour
 
     private GameObject[] warriorType;
     private PlayerController[] controllers;
-    private CoolTimeUIManager coolTimeUIs;
+    private CoolTimeManager coolTimeUIs;
 
-    private CinemachineVirtualCamera virtualCam;
     private Vector3 originalPosition;
     private Vector3 movePos;
 
@@ -28,8 +25,7 @@ public class PlayerWeapons : MonoBehaviour
         controllers[0] = GetComponentInChildren<PlayerController_Sword>();
         controllers[1] = GetComponentInChildren<PlayerController_Archer>();
 
-        coolTimeUIs = FindObjectOfType<CoolTimeUIManager>();
-        virtualCam = FindObjectOfType<CinemachineVirtualCamera>();
+        coolTimeUIs = FindObjectOfType<CoolTimeManager>();
 
         switchParticle = transform.GetChild(3).GetComponent<ParticleSystem>();
     }

@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -18,7 +17,7 @@ public class PlayerController_Archer : PlayerController
     private ShootPositions shootPositions;
     private Transform[] firePosition;
     private int chargeCount = 1;
-    private int maxChargeCount = 30;
+    private readonly int maxChargeCount = 30;
     private const float MIN_INITIAL_VELOCITY_X = 10f;
     private Vector3 currentVelocity;
     private List<Vector3> trajectoryPoints;
@@ -100,10 +99,11 @@ public class PlayerController_Archer : PlayerController
             //Debug.Log(chargeCount);
 
             // 파티클 + 사운드 
-            gameManager.Player_Stats.Particles[2].transform.localPosition = transform.up;
-            gameManager.Player_Stats.Particles[2].SetActive(true);
+            playerStats.Particles[2].transform.localPosition = transform.up;
+            playerStats.Particles[2].SetActive(true);
             soundManager.PlaySound_Player(audioSource, PlayerClips.ArcherCharge);
-            gameManager.CamShaker.ShakeCamera(1.0f, 0.3f, Cinemachine.CinemachineImpulseDefinition.ImpulseShapes.Rumble);
+            GameManager.Inst.CamShaker.ShakeCamera(1.0f, 0.3f,
+                Cinemachine.CinemachineImpulseDefinition.ImpulseShapes.Rumble);
             yield return chargeWaitSeconds;
         }
     }
@@ -143,8 +143,8 @@ public class PlayerController_Archer : PlayerController
     {
         if(context.performed)
         {
-            prevControlMode = gameManager.Player_Stats.ControlMode;
-            gameManager.Player_Stats.ControlMode = ControlMode.AimMode;
+            prevControlMode = playerStats.ControlMode;
+            playerStats.ControlMode = ControlMode.AimMode;
             isAiming = true;
             anim.SetBool("isAiming", isAiming);
             //lineRend.enabled = true;
@@ -152,7 +152,7 @@ public class PlayerController_Archer : PlayerController
         }
         else if(context.canceled)
         {
-            gameManager.Player_Stats.ControlMode = prevControlMode;
+            playerStats.ControlMode = prevControlMode;
             isAiming = false;
             anim.SetBool("isAiming", isAiming);
             ShootArrows(1, arrowPrefab);
@@ -163,16 +163,16 @@ public class PlayerController_Archer : PlayerController
 
     protected override void OnSpecialAttack(InputAction.CallbackContext context)
     {
-        if (gameManager.Player_Stats.CoolTimes[(int)Skills.SpecialAttack_Archer].IsReadyToUse())
+        if (playerStats.CoolTimes[(int)Skills.SpecialAttack_Archer].IsReadyToUse())
         {
             if (context.performed)
             {// Charging 애니메이션까지는 자동으로 넘어간다
-                prevControlMode = gameManager.Player_Stats.ControlMode;
-                gameManager.Player_Stats.ControlMode = ControlMode.AimMode;
+                prevControlMode = playerStats.ControlMode;
+                playerStats.ControlMode = ControlMode.AimMode;
                 isCharging = true;
                 anim.SetBool("isSpecialAttack", isCharging);
                 currentVelocity = MIN_INITIAL_VELOCITY_X * MIN_INITIAL_VELOCITY_X * transform.forward;
-                if (gameManager.Player_Stats.LockonTarget == null)
+                if (playerStats.LockonTarget == null)
                 {// 락온 상태가 아니면 일반 Charging
                     StartCoroutine(SpecialCharging(1, 5));
                 }
@@ -181,11 +181,11 @@ public class PlayerController_Archer : PlayerController
             }
             else if (context.canceled)
             {// 특수공격 발사
-                gameManager.Player_Stats.ControlMode = prevControlMode;
+                playerStats.ControlMode = prevControlMode;
                 isCharging = false;
                 anim.SetBool("isSpecialAttack", isCharging);
 
-                if (gameManager.Player_Stats.LockonTarget == null)
+                if (playerStats.LockonTarget == null)
                 {// 락온 타겟이 없으면 전방에 일정 각도로 퍼지는 공격 
                     shootPositions.ActivateShootPositions(chargeCount);
                     ShootArrows(chargeCount, arrowSpecial_Prefab);
@@ -195,17 +195,17 @@ public class PlayerController_Archer : PlayerController
                 {// 락온 타겟이 있으면 베지어 곡선을 따라가는 화살 발사 
                     StartCoroutine(ShootBezierArrows(chargeCount));
                 }
-                gameManager.Player_Stats.CoolTimes[(int)Skills.SpecialAttack_Archer].ResetCoolTime();
+                playerStats.CoolTimes[(int)Skills.SpecialAttack_Archer].ResetCoolTime();
             }
         }
     }
 
     protected override void OnRightClick(InputAction.CallbackContext _)
     {// 회피 기술 사용 
-        if(gameManager.Player_Stats.CoolTimes[(int)Skills.Dodge].IsReadyToUse())
+        if(playerStats.CoolTimes[(int)Skills.Dodge].IsReadyToUse())
         {
             anim.SetTrigger("onDodge");
-            gameManager.Player_Stats.CoolTimes[(int)Skills.Dodge].ResetCoolTime();
+            playerStats.CoolTimes[(int)Skills.Dodge].ResetCoolTime();
             controller.detectCollisions = false;    // 사용 시간 동안 무적
         }
     }

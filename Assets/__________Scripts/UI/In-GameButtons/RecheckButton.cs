@@ -26,6 +26,7 @@ public class RecheckButton : MonoBehaviour
         {
             Time.timeScale = 1f;
             canvasGroup.alpha = 0f;
+            canvasGroup.interactable = false;
             canvasGroup.blocksRaycasts = false;
         });
     }

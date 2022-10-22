@@ -14,7 +14,7 @@ using UnityEditor;
 /// </summary>
 public abstract class PlayerController : MonoBehaviour
 {
-    protected GameManager gameManager;
+    protected PlayerStats playerStats;
     protected SoundManager soundManager;
 
     protected InputActions actions;
@@ -29,7 +29,6 @@ public abstract class PlayerController : MonoBehaviour
     private Vector3 moveDir = Vector3.zero;
     private float moveSpeed = 0f;
     private Quaternion relativeMoveDir = Quaternion.identity;
-    private bool isAttacking = false;
 
     [SerializeField] float walkSpeed = 3.0f;
 
@@ -79,7 +78,7 @@ public abstract class PlayerController : MonoBehaviour
 
     protected virtual void Start()
     {
-        gameManager = GameManager.Inst;
+        playerStats = GameManager.Inst.Player_Stats;
         soundManager = SoundManager.Inst;
     }
 
@@ -119,7 +118,7 @@ public abstract class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        if (!gameManager.Player_Stats.IsDead)
+        if (!playerStats.IsDead)
         {
             Move_Turn();
 
@@ -151,7 +150,7 @@ public abstract class PlayerController : MonoBehaviour
             moveDir = keyboardInputDirection;
 
             Transform parent = transform.parent;
-            switch (gameManager.Player_Stats.ControlMode)
+            switch (playerStats.ControlMode)
             {
                 case ControlMode.Normal:
                     // 플레이어가 카메라를 기준으로 방향을 결정한다 
@@ -161,15 +160,16 @@ public abstract class PlayerController : MonoBehaviour
                 case ControlMode.AimMode:
                     // 움직일 수 없고 회전만 가능하다 
                     moveDir = Vector3.zero;
-                    parent.rotation = Quaternion.RotateTowards(parent.rotation,
-                        relativeMoveDir, turnSpeed);
+                    if(playerStats.LockonTarget == null)
+                        parent.rotation = Quaternion.RotateTowards(parent.rotation,
+                            relativeMoveDir, turnSpeed);
                     break;
                 case ControlMode.LockedOn:
                     // 플레이어가 락온된 상대를 바라보며 카메라를 기준으로 움직인다 
-                    if (gameManager.Player_Stats.LockonTarget != null)
+                    if (playerStats.LockonTarget != null)
                     {
                         relativeMoveDir = Quaternion.LookRotation(
-                            gameManager.Player_Stats.LockonTarget.position - parent.position, Vector3.up);
+                            playerStats.LockonTarget.position - parent.position, Vector3.up);
                         parent.rotation = Quaternion.RotateTowards(
                             parent.rotation, relativeMoveDir, turnSpeed);
                         moveDir = relativeMoveDir * moveDir;
@@ -182,7 +182,7 @@ public abstract class PlayerController : MonoBehaviour
 
     private void OnMoveInput(InputAction.CallbackContext context)
     {
-        if (!gameManager.Player_Stats.IsDead)
+        if (!playerStats.IsDead)
         {
             Vector3 inputDir = context.ReadValue<Vector2>();
             keyboardInputDirection = new Vector3(inputDir.x, 0, inputDir.y);
@@ -191,7 +191,7 @@ public abstract class PlayerController : MonoBehaviour
                 walkSpeed * inputDir.normalized.sqrMagnitude : 0f;
             // ------------------------
 
-            if (gameManager.Player_Stats.ControlMode != ControlMode.LockedOn)
+            if (playerStats.ControlMode != ControlMode.LockedOn)
             {
                 keyboardInputDirection = Quaternion.Euler(0, Camera.main!.transform.rotation.eulerAngles.y, 0) * keyboardInputDirection;
                 if (keyboardInputDirection.sqrMagnitude > 0)
@@ -210,10 +210,10 @@ public abstract class PlayerController : MonoBehaviour
 
     private void Heal_Performed(InputAction.CallbackContext _)
     {
-        if (!gameManager.Player_Stats.IsDead)
+        if (!playerStats.IsDead)
         {
             anim.SetTrigger(OnHeal);
-            gameManager.Player_Stats.Heal();
+            playerStats.Heal();
 
             soundManager.PlaySound_Player(audioSource, PlayerClips.Heal);
         }
@@ -221,29 +221,30 @@ public abstract class PlayerController : MonoBehaviour
 
     private void OnLockOn(InputAction.CallbackContext _)
     {
-        gameManager.Player_Stats.TargetLock();
+        playerStats.TargetLock();
     }
 
     private void OnWeaponChange(InputAction.CallbackContext _)
     {// 무기 변경 함수 
-        if (!gameManager.Player_Stats.IsDead)
+        if (!playerStats.IsDead)
         {
             if (Keyboard.current.digit1Key.wasPressedThisFrame || Gamepad.current.leftShoulder.wasPressedThisFrame)
             {// Sword 로 변경 
                 playerWeapon.SwitchWeapon(Weapons.Sword);
-                gameManager.Player_Stats.SetWeapon(Weapons.Sword);
+                playerStats.SetWeapon(Weapons.Sword);
             }
             else if (Keyboard.current.digit2Key.wasPressedThisFrame || Gamepad.current.rightShoulder.wasPressedThisFrame)
             {// Archer 로 변경 
                 playerWeapon.SwitchWeapon(Weapons.Bow);
-                gameManager.Player_Stats.SetWeapon(Weapons.Bow);
+                playerStats.SetWeapon(Weapons.Bow);
             }
+            moveDir = Vector3.zero; // 움직이던 중에 무기를 바꾸면 벡터가 남아있던 버그 방지 
         }
     }
 
     private void OnJumpInput(InputAction.CallbackContext _)
     {
-        if (isGrounded && !gameManager.Player_Stats.IsDead)
+        if (isGrounded && !playerStats.IsDead)
         {
             Jump(jumpCounter);
             jumpCounter++;

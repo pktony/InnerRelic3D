@@ -1,10 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class LockonEffect : MonoBehaviour
 {
-    Transform player;
+    private Transform player;
 
     private void Start()
     {

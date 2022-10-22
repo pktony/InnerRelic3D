@@ -4,11 +4,13 @@ using System.Collections.Generic;
 using Cinemachine;
 using UnityEngine;
 
+/// <summary>
+/// 홈, 인트로에서 돌리 카메라를 조종하는 클래스 
+/// </summary>
 public class DollyController : MonoBehaviour
 {
     CinemachineDollyCart dollyCart;
     GameObject dollyCam;
-
     MainCam mainCam;
 
     CamDrag_Panel controlUI;
@@ -25,16 +27,18 @@ public class DollyController : MonoBehaviour
         controlUI = FindObjectOfType<CamDrag_Panel>();
     }
 
+    /// <summary>
+    /// 인게임 인트로 초기화 함수 
+    /// </summary>
     public void InitializeIntroUIs()
     {
         dollyCart.m_Position = 0f;
         controlUI.transform.parent.gameObject.SetActive(false);
-        //UIManager.Inst.RoundUI.gameObject.SetActive(false);
 
         StartCoroutine(Intro());
     }
 
-    IEnumerator Intro()
+    private IEnumerator Intro()
     {
         while (true)
         {

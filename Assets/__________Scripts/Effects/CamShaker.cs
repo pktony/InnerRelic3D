@@ -1,8 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
 using Cinemachine;
 using UnityEngine;
 
+/// <summary>
+/// Cinemachine Plugin을 활용한 카메라 진동 효과 클래스 
+/// </summary>
 public class CamShaker : MonoBehaviour
 {
     CinemachineImpulseSource impulseSource;

@@ -1,16 +1,18 @@
 using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
+/// <summary>
+/// FPS를 표시하는 클래스 
+/// </summary>
 public class FPSIndicator : MonoBehaviour
 {
-    TextMeshProUGUI fpsText;
-    WaitForSeconds waitSeconds;
+    private TextMeshProUGUI fpsText;
+    private WaitForSeconds waitSeconds;
 
-    float fps = 0f;
-    float deltaTime = 0f;
-    float updateInterval = 1.0f;
+    private float fps = 0f;
+    private float deltaTime = 0f;
+    private readonly float updateInterval = 1.0f;
 
     private void Awake()
     {
@@ -28,7 +30,7 @@ public class FPSIndicator : MonoBehaviour
         deltaTime += (Time.unscaledDeltaTime - deltaTime) * 0.1f;
     }
 
-    IEnumerator RefreshFPS()
+    private IEnumerator RefreshFPS()
     {// FPS 새로고침 함수 
         while(true)
         {

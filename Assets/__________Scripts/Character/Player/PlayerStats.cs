@@ -39,13 +39,13 @@ public class PlayerStats : MonoBehaviour, IHealth, IBattle
     protected CinemachineVirtualCamera lockonCam;
 
     //Skill Data
+    CoolTimeManager coolTimeUIManager;
     public SkillData[] skillDatas;
     private CoolTimeData[] coolTimeDatas;
     // [0] heal
     // [1] sword
     // [2] archer
     // [3] dodge
-    private CoolTimeUIManager coolTimeManager;
 
     private GameObject[] particles = new GameObject[4];
     // [0] use
@@ -77,7 +77,7 @@ public class PlayerStats : MonoBehaviour, IHealth, IBattle
                 if (value < healthPoint)
                 { // hit
                     anim_Sword.SetTrigger("onHit");
-                    anim_Archer.SetTrigger("onHit");
+                        anim_Archer.SetTrigger("onHit");
                     PlayRandomHitSound();
                 }
                 else if(value > healthPoint)
@@ -179,16 +179,15 @@ public class PlayerStats : MonoBehaviour, IHealth, IBattle
         parrywaitSeconds = new WaitForSeconds(parryDuration);
         parryingCoroutine = ParryingTimer();
         parryingHelper = GetComponentInChildren<ParryingHelper>();
-        
 
         // Cool Time Data Initialization --------------------------------------
-        coolTimeManager = FindObjectOfType<CoolTimeUIManager>();
-        coolTimeManager.InitializeUIs();
+        coolTimeUIManager = FindObjectOfType<CoolTimeManager>();
+        coolTimeUIManager.InitializeUIs();
         coolTimeDatas = new CoolTimeData[(int)Skills.SkillCount];
         for (int i = 0; i < (int)Skills.SkillCount; i++)
         {
             coolTimeDatas[i] = new CoolTimeData(skillDatas[i]);
-            coolTimeDatas[i].onCoolTimeChange += coolTimeManager[i].RefreshUI;
+            coolTimeDatas[i].onCoolTimeChange += coolTimeUIManager[i].RefreshUI;
         }
 
         // Particle 초기화 ------------------------------------------------------

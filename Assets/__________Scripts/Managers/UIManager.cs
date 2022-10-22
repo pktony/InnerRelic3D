@@ -30,7 +30,6 @@ public class UIManager : Singleton<UIManager>
     TextMeshProUGUI populationText;
     Animator populationAnimator;
 
-
     Round_UI roundUI;
     InfoPanel infoPanel;
     TimerController timerController;
@@ -38,7 +37,7 @@ public class UIManager : Singleton<UIManager>
     GameoverUI gameoverUI;
 
     [SerializeField] private string startInstruction = "KILL ALL ENEMIES IN TIME";
-    [SerializeField] private string roundEndInstrction = "VICTORY !";
+    [SerializeField] private string roundEndInstruction = "VICTORY !";
 
     // 프로퍼티 -----------------------------------------------------------------
     // - 홈 화면
@@ -53,7 +52,6 @@ public class UIManager : Singleton<UIManager>
 
     // 델리게이트 ----------------------------------------------------------------
     public Action<int, float>[] onTimerActivate;
-    public Action onVictory;
 
     protected override void Awake()
     {
@@ -95,10 +93,10 @@ public class UIManager : Singleton<UIManager>
             maxEnemyText = safeAreaUI.GetChild(3).GetComponent<TextMeshProUGUI>();
 
             gameoverUI = FindObjectOfType<GameoverUI>();
+            roundUI.gameObject.SetActive(false);
 
             gameManager.onRoundStart += OnGameStart;
             gameManager.onEnemyDie += RefreshPopulationText;
-            gameManager.onEnemyDieRed += RefreshPopulationText_Red;
             gameManager.onRoundOver += RoundOver_UI;
             gameManager.onGameover += OnGameOver;
         }
@@ -112,6 +110,7 @@ public class UIManager : Singleton<UIManager>
 
     IEnumerator ShowStartInstruction(int enemyPerRound, int enemies)
     {// 임무 / 라운드 표시
+        roundUI.gameObject.SetActive(true);
         maxEnemyText.text = "/   " + enemyPerRound.ToString();
         Color color = instructionText.color;
         instructionText.text = startInstruction;
@@ -152,13 +151,14 @@ public class UIManager : Singleton<UIManager>
     {
         populationText.text = enemiesLeft.ToString();
         populationAnimator.SetTrigger("onDecrease");
-    }
-
-    public void RefreshPopulationText_Red(int enemiesLeft)
-    {
-        populationText.text = enemiesLeft.ToString();
-        populationText.fontMaterial.SetColor("_Color", Color.red);
-        populationAnimator.SetTrigger("onDecrease_Red");
+        if(enemiesLeft > 3)
+        {
+            populationText.color = Color.black;
+        }
+        else if(enemiesLeft == 3)
+        {
+            populationText.color = Color.red;
+        }
     }
 
     // 라운드 || 게임 종료 --------------------------------------------------------
@@ -177,7 +177,7 @@ public class UIManager : Singleton<UIManager>
     IEnumerator ShowVictory(int currentRound)
     { // 승리 표시 
         Color color = instructionText.color;
-        instructionText.text = roundEndInstrction;
+        instructionText.text = roundEndInstruction;
 
         float timer = 0f;
         while (timer < 3.0f)

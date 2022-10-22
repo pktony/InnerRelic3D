@@ -990,7 +990,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4518782735287940052}
-  - component: {fileID: 4518782735287940051}
+  - component: {fileID: 4275858786923361663}
   m_Layer: 5
   m_Name: BattleButtons
   m_TagString: Untagged
@@ -1024,7 +1024,7 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 200, y: 200}
   m_Pivot: {x: 1, y: 0}
---- !u!114 &4518782735287940051
+--- !u!114 &4275858786923361663
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1033,7 +1033,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 4518782735287940053}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1023c346eb8264ecd81b0f7ad1e6946c, type: 3}
+  m_Script: {fileID: 11500000, guid: 516c1c29272f04347ab1d8458e88c39c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &4518782735388734122
