@@ -1,9 +1,9 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+/// <summary>
+/// 오디오 클립을 관리하고 사운드 재생 함수가 있는 매니저 
+/// </summary>
 public class SoundManager : Singleton<SoundManager>
 {
     AudioSource audioSource;
@@ -40,7 +40,7 @@ public class SoundManager : Singleton<SoundManager>
         }
     }
 
-    public System.Action<float> onVolumeChange;
+    private System.Action<float> onVolumeChange;
 
     protected override void Awake()
     {

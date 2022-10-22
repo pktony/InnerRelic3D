@@ -40,8 +40,7 @@ public class Arrow_Bezier : Arrow
         if(!isHit)
             transform.position = CalculateBezierTrajectory(bezierPoints[0], bezierPoints[1], target);
     }
-
-
+    
     private void InitializeBezierPositions()
     {
         startPoint = transform.position;
@@ -58,13 +57,21 @@ public class Arrow_Bezier : Arrow
         RandomBezierPoints();
     }
 
+    /// <summary>
+    /// 3차 베지어 곡선의
+    /// 1, 2번 앵커 포인트를 랜덤으로 지정해주는 함수 
+    /// </summary>
     private void RandomBezierPoints()
     {
-        bezierPoints[0] = GameManager.Inst.Player_Stats.transform.position - transform.forward * 5f + Vector3.up * anchorPositionOffset + anchorPositionOffset * Random.insideUnitSphere ;
+        bezierPoints[0] = GameManager.Inst.Player_Stats.transform.position - 
+            transform.forward * 5f + Vector3.up * anchorPositionOffset + 
+            anchorPositionOffset * Random.insideUnitSphere ;
         bezierPoints[1] = target + anchorPositionOffset * Random.insideUnitSphere;
     }
 
-
+    /// <summary>
+    /// 3차 베지어 곡선을 계산하는 함수 
+    /// </summary>
     private Vector3 CalculateBezierTrajectory(Vector3 anchorPoint1, Vector3 anchorPoint2, Vector3 _target)
     { // 베지어 곡선 경로 계산
         // https://en.wikipedia.org/wiki/B%C3%A9zier_curve

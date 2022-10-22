@@ -97,6 +97,11 @@ public class InfoPanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, 
         StartCoroutine(HidePanel(rect.anchoredPosition, 2.0f));
     }
 
+    /// <summary>
+    /// InfoPanel를 드래그할 때
+    /// 드래그 지점을 따라가도록 설정하는 함수 
+    /// </summary>
+    /// <param name="eventData"></param>
     public void OnDrag(PointerEventData eventData)
     {
         Vector2 mousePos = eventData.position;
@@ -105,6 +110,12 @@ public class InfoPanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, 
         rect.anchoredPosition = mousePos;
     }
 
+    
+    /// <summary>
+    /// 아래로 일정 속도 이상으로 스와이프하면
+    /// 즉시 숨기는 기능 
+    /// </summary>
+    /// <param name="eventData"></param>
     public void OnEndDrag(PointerEventData eventData)
     {
         if(eventData.delta.y < - swipeSensitivity )
@@ -112,5 +123,4 @@ public class InfoPanel : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, 
             StartCoroutine(HidePanel(rect.anchoredPosition));
         }
     }
-
 }

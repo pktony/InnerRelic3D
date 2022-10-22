@@ -17,13 +17,14 @@ public class PlayerController_Sword : PlayerController
 
     private TrailRenderer[] swordTrails;
     public Transform swordParent;
-    
-    // 애니메이션 string 변수 캐싱 
+
+    #region 애니메이션 string 변수 캐싱 
     private readonly int OnDizzy = Animator.StringToHash("onDizzy");
     private readonly int IsSpecialAttack = Animator.StringToHash("isSpecialAttack");
     private readonly int Attack = Animator.StringToHash("onAttack");
     private readonly int ComboTimer = Animator.StringToHash("ComboTimer");
     private readonly int IsDefending = Animator.StringToHash("isDefending");
+    #endregion
 
     #region UNITY EVENT 함수 ####################################################
     protected override void Awake()

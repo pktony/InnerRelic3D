@@ -4,6 +4,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+/// <summary>
+/// 3개의 스폰 지점을 번갈아 가면서 스폰하기 위해
+/// 컨트롤 해주는 클래스  
+/// </summary>
 public class SpawnerController : MonoBehaviour
 {
     GameManager gameManager;
@@ -11,9 +15,9 @@ public class SpawnerController : MonoBehaviour
 
     private EnemySpawner[] spawners;
 
-    int spawnerIndex = 0;
-
-    float timer = 0f;
+    private int spawnerIndex = 0;
+    
+    private float timer = 0f;
     [SerializeField] float spawnCoolTime = 3.0f;
 
     private float checkInterval = 0.5f;
@@ -66,6 +70,10 @@ public class SpawnerController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 라운드가 끝날 때 모두 처지하는 함수 
+    /// </summary>
+    /// <param name="_"> 게임매니저 onRoundOver 델리게이트 등록을 위한 미사용 파라미터</param>
     private void InstantKillAllEnemies(int _)
     {
         foreach(var enemy in enemies)
@@ -93,6 +101,9 @@ public class SpawnerController : MonoBehaviour
         timer = 0f;
     }
 
+    /// <summary>
+    /// .다음 스포너로 넘어가는 함수 
+    /// </summary>
     private void ToNextSpawner()
     {
         spawnerIndex = (spawnerIndex + 1) % spawners.Length;

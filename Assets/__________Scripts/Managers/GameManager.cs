@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// 게임 로직관련 데이터와 함수가 들어있는 매니저 
+/// </summary>
 public class GameManager : Singleton<GameManager>
 {
     UIManager uiManager;
@@ -18,7 +20,7 @@ public class GameManager : Singleton<GameManager>
 
     //  변수 --------------------------------------------------------------------
     private int currentRound = 0;
-    private int totalRounds = 3;
+    private readonly int totalRounds = 3;
     private int enemiesLeft;
     private float[] roundTimer;
     private bool isRoundOver = false;
@@ -28,24 +30,22 @@ public class GameManager : Singleton<GameManager>
     [SerializeField] private float maxRoundTime = 180f;
 
     // 델리게이트 -----------------------------------------------------------------
-    public Action<int, int> onRoundStart;
+    public Action<int, int> onRoundStart;   // <처치해야할 적 숫자, 현재 라운드>
     public Action startSpawn;
-    public Action<int> onEnemyDie;
-    public Action<int> onEnemyDieRed;
+    public Action<int> onEnemyDie;          // <남은 적 숫자>
+    public Action<int> onEnemyDieRed;       // <남은 적 숫자>
     
-    public Action<int> onRoundOver;
+    public Action<int> onRoundOver;         // <현재 라운드>
     public Action onGameover;
 
     // 프로퍼티 ------------------------------------------------------------------
     public PlayerStats Player_Stats => mainPlayer;
     public PlayerController_Archer ArcherController => archerController;
-    public PlayerController_Sword SwordController => swordController;
     public CamShaker CamShaker => camShaker;
     public float[] RoundTimer => roundTimer;
     public bool IsRoundOver => isRoundOver;
     public bool IsGameOver
-    {
-        get => isGameOver;
+    {   // 게임이 끝났다고 표시할 때 실행될 프로퍼티 
         set
         {
             isGameOver = value;
@@ -61,7 +61,7 @@ public class GameManager : Singleton<GameManager>
         {
             currentRound = value;
             switch(currentRound)
-            {
+            {   // 라운드 별 처치해야할 적을 설정 
                 case 1:
                     enemyPerRound = 5;
                     break;
@@ -88,7 +88,7 @@ public class GameManager : Singleton<GameManager>
                     if (enemiesLeft > 3)
                         onEnemyDie?.Invoke(enemiesLeft);
                     else if (enemiesLeft == 3)
-                    {
+                    {   // 3마리 남았을 때 알림을 표시 
                         uiManager.InfoPanel.ShowPanel("3 Enemies Left. Keep Up");
                         soundManager.PlaySound_UI(UIClips.TimeTicking);
                         onEnemyDieRed?.Invoke(enemiesLeft);
@@ -96,7 +96,7 @@ public class GameManager : Singleton<GameManager>
                     else if (enemiesLeft > 0)
                         onEnemyDieRed?.Invoke(enemiesLeft);
                     else if (enemiesLeft == 0)
-                    {
+                    {   // 모두 처치했을 때 실행할 것들 
                         isRoundOver = true;
                         soundManager.PlaySound_UI(UIClips.Victory);
                         StartCoroutine(SlowMotion());
@@ -159,7 +159,7 @@ public class GameManager : Singleton<GameManager>
 
     private IEnumerator ShowRound()
     {
-        onRoundStart.Invoke(enemyPerRound, enemiesLeft);    // 미션 / 라운드 표시
+        onRoundStart.Invoke(enemyPerRound, enemiesLeft);
 
         yield return new WaitForSeconds(3.0f);
         startSpawn?.Invoke();   // 몬스터 스폰 시작
@@ -171,6 +171,10 @@ public class GameManager : Singleton<GameManager>
         }
     }
 
+    /// <summary>
+    /// 라운드가 끝나고 남은 시간을 다음 타이머에 더해줄 때 실행되는 함수 
+    /// </summary>
+    /// <param name="multiplier"></param>
     public void DecreaseTimer(float multiplier = 1f)
     {
         if (roundTimer[currentRound - 1] > 0f)
@@ -193,6 +197,10 @@ public class GameManager : Singleton<GameManager>
 
     public void ReduceEnemyCount() => EnemiesLeft--;
 
+    /// <summary>
+    /// 라운드를 성공했을 때 슬로우 모션 실행 코루틴 
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator SlowMotion()
     {
         Time.timeScale = 0.2f;

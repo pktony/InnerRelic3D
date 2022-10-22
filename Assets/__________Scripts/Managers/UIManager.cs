@@ -38,7 +38,7 @@ public class UIManager : Singleton<UIManager>
     GameoverUI gameoverUI;
 
     [SerializeField] private string startInstruction = "KILL ALL ENEMIES IN TIME";
-    [SerializeField] private string roundEndInstrction = "VICTORY !";
+    [SerializeField] private string roundEndInstruction = "VICTORY !";
 
     // 프로퍼티 -----------------------------------------------------------------
     // - 홈 화면
@@ -53,7 +53,6 @@ public class UIManager : Singleton<UIManager>
 
     // 델리게이트 ----------------------------------------------------------------
     public Action<int, float>[] onTimerActivate;
-    public Action onVictory;
 
     protected override void Awake()
     {
@@ -177,7 +176,7 @@ public class UIManager : Singleton<UIManager>
     IEnumerator ShowVictory(int currentRound)
     { // 승리 표시 
         Color color = instructionText.color;
-        instructionText.text = roundEndInstrction;
+        instructionText.text = roundEndInstruction;
 
         float timer = 0f;
         while (timer < 3.0f)

@@ -29,7 +29,6 @@ public abstract class PlayerController : MonoBehaviour
     private Vector3 moveDir = Vector3.zero;
     private float moveSpeed = 0f;
     private Quaternion relativeMoveDir = Quaternion.identity;
-    private bool isAttacking = false;
 
     [SerializeField] float walkSpeed = 3.0f;
 
@@ -161,8 +160,9 @@ public abstract class PlayerController : MonoBehaviour
                 case ControlMode.AimMode:
                     // 움직일 수 없고 회전만 가능하다 
                     moveDir = Vector3.zero;
-                    parent.rotation = Quaternion.RotateTowards(parent.rotation,
-                        relativeMoveDir, turnSpeed);
+                    if(gameManager.Player_Stats.LockonTarget == null)
+                        parent.rotation = Quaternion.RotateTowards(parent.rotation,
+                            relativeMoveDir, turnSpeed);
                     break;
                 case ControlMode.LockedOn:
                     // 플레이어가 락온된 상대를 바라보며 카메라를 기준으로 움직인다 
@@ -238,6 +238,7 @@ public abstract class PlayerController : MonoBehaviour
                 playerWeapon.SwitchWeapon(Weapons.Bow);
                 gameManager.Player_Stats.SetWeapon(Weapons.Bow);
             }
+            moveDir = Vector3.zero; // 움직이던 중에 무기를 바꾸면 벡터가 남아있던 버그 방지 
         }
     }
 

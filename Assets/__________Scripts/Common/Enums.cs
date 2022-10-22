@@ -6,11 +6,7 @@ using UnityEngine;
 /// <summary>
 /// Enums 모음집
 /// </summary>
-enum PlayerState : byte
-{
-    Walk = 0,
-    Run
-}
+
 public enum ControlMode : byte 
 {
     Normal = 0, 

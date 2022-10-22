@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using System;
@@ -54,6 +53,18 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
     private WaitForSeconds knockbackWaitSeconds;
     #endregion
 
+    #region 애니메이션 String 캐싱 
+    private readonly int OnHit = Animator.StringToHash("onHit");
+    private readonly int OnDefend = Animator.StringToHash("onDefend");
+    private readonly int AttackNum = Animator.StringToHash("AttackNum");
+    private readonly int OnAttack = Animator.StringToHash("onAttack");
+    private readonly int OnParried = Animator.StringToHash("onParried");
+    private readonly int IsDead = Animator.StringToHash("isDead");
+    private readonly int OnDie = Animator.StringToHash("onDie");
+    private readonly int IsMoving = Animator.StringToHash("isMoving");
+    private readonly int CurrentStatus = Animator.StringToHash("CurrentStatus");
+    #endregion  
+    
     #region IHEALTH
     public float HP
     {
@@ -63,8 +74,7 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
             healthPoint = Mathf.Clamp(value, 0f, maxHealthPoint);
             if (healthPoint > 0f)
             {
-                anim.SetTrigger("onHit");
-                //Debug.Log($"Enemy HP : {healthPoint}");
+                anim.SetTrigger(OnHit);
                 onHealthChange?.Invoke();
             }
             else
@@ -148,7 +158,8 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
     #endregion
 
     #region PRIVATE 함수 ########################################################
-    IEnumerator StatusCheck()
+
+    private IEnumerator StatusCheck()
     {
         while (!isDead)
         {
@@ -172,7 +183,7 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
         }
     }
 
-    void IdleCheck()
+    private void IdleCheck()
     {
         if(SearchPlayer())
         {   // 탐지 범위 내 있으면 추적 
@@ -180,7 +191,7 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
         }
     }
 
-    void TrackCheck()
+    private void TrackCheck()
     {
         if (!SearchPlayer())
         {
@@ -194,7 +205,7 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
             TrackPlayer();
     }
 
-    void TrackPlayer()
+    private void TrackPlayer()
     {
         if (!agent.pathPending)
         {
@@ -202,7 +213,7 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
         }
     }
 
-    void AttackCheck()
+    private void AttackCheck()
     {
         if (IsInAttackRange() && agent.isStopped)
         {   // 공격 사거리 내 있으면 공격 쿨타임 대기 
@@ -211,13 +222,13 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
             float defendRandNum = UnityEngine.Random.value;
             if(defendRandNum < defendProbability)
             {
-                anim.SetTrigger("onDefend");
+                anim.SetTrigger(OnDefend);
             }
             if (attackTimer > attackCoolTime)
             { // 공격
                 int attackNum = UnityEngine.Random.Range(1, 5); // 1 2 3 4
-                anim.SetInteger("AttackNum", attackNum);
-                anim.SetTrigger("onAttack");
+                anim.SetInteger(AttackNum, attackNum);
+                anim.SetTrigger(OnAttack);
                 attackTimer = 0f;
             }
         }
@@ -233,9 +244,9 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
         yield return blinkWaitSeconds;
         mat.SetColor("_EmissionColor", Color.black);
     }
-    void KnockBack()
+    private void KnockBack()
     {
-        anim.SetTrigger("onParried");
+        anim.SetTrigger(OnParried);
         rigid.isKinematic = false;
         Vector3 knockbackDir = transform.position - GameManager.Inst.Player_Stats.transform.position;
         knockbackDir = knockbackDir.normalized;
@@ -243,7 +254,7 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
         StartCoroutine(KnockBackTimer());
     }
 
-    IEnumerator KnockBackTimer()
+    private IEnumerator KnockBackTimer()
     {
         yield return knockbackWaitSeconds;
         rigid.isKinematic = true;
@@ -254,7 +265,7 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
     /// Player 탐지 함수 
     /// </summary>
     /// <returns>True : 범위 내 플레이어 있음  False : 범위 내 플레이어 없음</returns>
-    bool SearchPlayer()
+    private bool SearchPlayer()
     {
         if(Physics.OverlapSphereNonAlloc(
             transform.position, detectedRange, searchColls, LayerMask.GetMask("Player")) > 0)
@@ -276,7 +287,7 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
             < attackRange * attackRange;
     }
 
-    void LockOn()
+    private void LockOn()
     {
         transform.rotation = Quaternion.LookRotation(target.position - transform.position);
     }
@@ -285,8 +296,8 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
     {
         isDead = true;
         agent.isStopped = true;
-        anim.SetBool("isDead", isDead);
-        anim.SetTrigger("onDie");
+        anim.SetBool(IsDead, isDead);
+        anim.SetTrigger(OnDie);
         onDie?.Invoke();
         gameObject.layer = LayerMask.NameToLayer("Default");    // 타겟 락 방지
         soundManager.PlaySound_Enemy(audioSource, EnemyClip.Die);
@@ -302,7 +313,7 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
             case EnemyState.Idle:
                 break;
             case EnemyState.Track:
-                anim.SetBool("isMoving", false);
+                anim.SetBool(IsMoving, false);
                 break;
             case EnemyState.Attack:
                 agent.isStopped = false;
@@ -318,7 +329,7 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
             case EnemyState.Idle:
                 break;
             case EnemyState.Track:
-                anim.SetBool("isMoving", true);
+                anim.SetBool(IsMoving, true);
                 break;
             case EnemyState.Attack:
                 agent.isStopped = true;
@@ -332,7 +343,7 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
                 break;
         }
 
-        anim.SetInteger("CurrentStatus", (int)newStatus);
+        anim.SetInteger(CurrentStatus, (int)newStatus);
         status = newStatus;
     }
     #endregion

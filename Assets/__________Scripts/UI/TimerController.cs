@@ -27,7 +27,7 @@ public class TimerController : MonoBehaviour
         uiManager = UIManager.Inst;
     }
 
-    IEnumerator TimerAnimation(int currentRound)
+    private IEnumerator TimerAnimation(int currentRound)
     {
         float timer = 0f;
         while(timer < 3.0f)

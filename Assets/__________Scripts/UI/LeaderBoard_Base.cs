@@ -1,7 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// 홈화면 리더보드, 인게임 리더보드의 부모 클래스 
+/// </summary>
 public class LeaderBoard_Base : MonoBehaviour
 {
     protected CanvasGroup group;

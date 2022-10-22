@@ -1,7 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// 애니메이션과 소리 타이밍을 맞추기 위해 만든 도우미 클래스 
+/// </summary>
 public class EnemyAnimatorHelper : MonoBehaviour
 {
     SoundManager soundManager;

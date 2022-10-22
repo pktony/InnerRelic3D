@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -18,7 +17,7 @@ public class PlayerController_Archer : PlayerController
     private ShootPositions shootPositions;
     private Transform[] firePosition;
     private int chargeCount = 1;
-    private int maxChargeCount = 30;
+    private readonly int maxChargeCount = 30;
     private const float MIN_INITIAL_VELOCITY_X = 10f;
     private Vector3 currentVelocity;
     private List<Vector3> trajectoryPoints;
