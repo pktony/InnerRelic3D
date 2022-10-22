@@ -8,18 +8,25 @@ public class ShootPositions : MonoBehaviour
     private Transform[] shootPositions;
 
     public float shootAngle = 30f;
+    public GameObject shootPositionPrefab;
 
-    private void Awake()
+    public void InitailizeShootPosistions(int maxShootCount)
     {
+        for (int i = 0; i < maxShootCount; i++)
+        {
+            GameObject obj = Instantiate(shootPositionPrefab, transform);
+            obj.SetActive(false);
+        }
+
         shootPositions = new Transform[transform.childCount];
         for (int i = 0; i < transform.childCount; i++)
             shootPositions[i] = transform.GetChild(i);
     }
 
-    public Transform[] InitializeShootPosition(int shootCount)
+    public Transform[] ActivateShootPositions(int shootCount)
     {
         for(int i = 0; i < transform.childCount; i ++)
-        {
+        {// 먼저 전부 끄고
             transform.GetChild(i).gameObject.SetActive(false);
         }
 
