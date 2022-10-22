@@ -18,7 +18,7 @@ public class RecheckButton : MonoBehaviour
 
         yesButton.onClick.AddListener(() =>
         {
-            LoadingSceneManager.LoadScene("Stage");
+            SceneManager.LoadScene("Stage");
             Time.timeScale = 1.0f;
         });
     
