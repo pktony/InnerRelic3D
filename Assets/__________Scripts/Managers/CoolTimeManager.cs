@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CoolTimeUIManager : MonoBehaviour
+public class CoolTimeManager : MonoBehaviour
 {
     CoolTime_UI[] coolTime_UIs;
 

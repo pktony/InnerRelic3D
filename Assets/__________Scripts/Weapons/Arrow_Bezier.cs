@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class Arrow_Bezier : Arrow
 {
+    PlayerStats playerStats;
+
     private Vector3[] bezierPoints;
 
     Vector3 startPoint;
@@ -28,6 +30,7 @@ public class Arrow_Bezier : Arrow
 
     protected override void Start()
     {
+        playerStats = GameManager.Inst.Player_Stats;
         InitializeBezierPositions();
     }
 
@@ -44,14 +47,14 @@ public class Arrow_Bezier : Arrow
     private void InitializeBezierPositions()
     {
         startPoint = transform.position;
-        Transform _target = GameManager.Inst.Player_Stats.LockonTarget;
+        Transform _target = playerStats.LockonTarget;
         if(_target != null)
         {
             target = _target.position + Vector3.up;
         }
         else
         {
-            target = GameManager.Inst.Player_Stats.transform.forward * 30f;
+            target = playerStats.transform.forward * 30f;
             Destroy(this.gameObject, 0.3f);
         }
         RandomBezierPoints();
@@ -63,7 +66,7 @@ public class Arrow_Bezier : Arrow
     /// </summary>
     private void RandomBezierPoints()
     {
-        bezierPoints[0] = GameManager.Inst.Player_Stats.transform.position - 
+        bezierPoints[0] = playerStats.transform.position - 
             transform.forward * 5f + Vector3.up * anchorPositionOffset + 
             anchorPositionOffset * Random.insideUnitSphere ;
         bezierPoints[1] = target + anchorPositionOffset * Random.insideUnitSphere;
@@ -104,7 +107,7 @@ public class Arrow_Bezier : Arrow
         {
             StartCoroutine(PlayParticles(hitParticle));
             IBattle target = collider.GetComponent<IBattle>();
-            target?.TakeDamage(GameManager.Inst.Player_Stats.AttackPower);
+            target?.TakeDamage(playerStats.AttackPower);
         }
         else
             Destroy(this.gameObject);

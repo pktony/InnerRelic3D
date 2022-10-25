@@ -221,11 +221,11 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
             attackTimer += updateInterval;
             float defendRandNum = UnityEngine.Random.value;
             if(defendRandNum < defendProbability)
-            {
+            {// 일정확률로 공격 상태일 때 방어
                 anim.SetTrigger(OnDefend);
             }
             if (attackTimer > attackCoolTime)
-            { // 공격
+            { // 공격실행
                 int attackNum = UnityEngine.Random.Range(1, 5); // 1 2 3 4
                 anim.SetInteger(AttackNum, attackNum);
                 anim.SetTrigger(OnAttack);

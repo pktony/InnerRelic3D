@@ -38,7 +38,7 @@ public class SettingManager : Singleton<SettingManager>
     private void Initialize(Scene arg0, LoadSceneMode arg1)
     {
         if(!LoadSettingValues())
-        {
+        {// 최초 로드데이터가 없으면 새로 저장 후 불러오기
             SaveSettingValues();
             LoadSettingValues();
         }    
@@ -150,6 +150,7 @@ public class SettingManager : Singleton<SettingManager>
                 }
                 scores[i] = newScore;
                 SaveGameRank();
+                UIManager.Inst.LeaderBoard_InGame.RefreshLeaderBoard();
                 UIManager.Inst.InfoPanel.ShowPanel("New High Score !");
                 SoundManager.Inst.PlaySound_UI(UIClips.Fanfare);
                 break;

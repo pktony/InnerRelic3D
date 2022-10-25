@@ -52,7 +52,7 @@ public class PlayerController_Sword : PlayerController
             spinTimer += 1.0f;
             if (spinTimer > dizzyTime)
             {
-                gameManager.Player_Stats.CoolTimes[(int)Skills.SpecialAttack_Sword].ResetCoolTime();
+                playerStats.CoolTimes[(int)Skills.SpecialAttack_Sword].ResetCoolTime();
                 isDizzy = true;
                 isSpinning = false;
                 StartCoroutine(FreezeControl(2.0f));
@@ -81,17 +81,17 @@ public class PlayerController_Sword : PlayerController
     #region PROTECTED 함수 ######################################################
     protected override void OnAttack(InputAction.CallbackContext context)
     {
-        if (context.performed && !gameManager.Player_Stats.IsDead)
+        if (context.performed && !playerStats.IsDead)
         {
-            prevControlMode = gameManager.Player_Stats.ControlMode;
-            gameManager.Player_Stats.ControlMode = ControlMode.AimMode;
+            prevControlMode = playerStats.ControlMode;
+            playerStats.ControlMode = ControlMode.AimMode;
             anim.SetTrigger(Attack);
             anim.SetFloat(ComboTimer, Mathf.Repeat(anim.GetCurrentAnimatorStateInfo(0).normalizedTime, 1.0f));
-            gameManager.CamShaker.ShakeCamera(1.0f, 0.3f, CinemachineImpulseDefinition.ImpulseShapes.Bump);
+            GameManager.Inst.CamShaker.ShakeCamera(1.0f, 0.3f, CinemachineImpulseDefinition.ImpulseShapes.Bump);
         }
         else if (context.canceled)
         {
-            gameManager.Player_Stats.ControlMode = prevControlMode;
+            playerStats.ControlMode = prevControlMode;
         }
     }
 
@@ -99,23 +99,23 @@ public class PlayerController_Sword : PlayerController
     {// 방어 스킬
         if (context.performed)
         {
-            prevControlMode = gameManager.Player_Stats.ControlMode;
-            gameManager.Player_Stats.ControlMode = ControlMode.AimMode;
-            gameManager.Player_Stats.Defend();
+            prevControlMode = playerStats.ControlMode;
+            playerStats.ControlMode = ControlMode.AimMode;
+            playerStats.Defend();
             anim.SetBool(IsDefending, true);
         }
         else if (context.canceled)
         {
-            gameManager.Player_Stats.ControlMode = prevControlMode;
-            gameManager.Player_Stats.UnDefend();
+            playerStats.ControlMode = prevControlMode;
+            playerStats.UnDefend();
             anim.SetBool(IsDefending, false);
         }
     }
 
     protected override void OnSpecialAttack(InputAction.CallbackContext context)
     {
-        if (gameManager.Player_Stats.CoolTimes[(int)Skills.SpecialAttack_Sword].IsReadyToUse()
-            && !gameManager.Player_Stats.IsDead)
+        if (playerStats.CoolTimes[(int)Skills.SpecialAttack_Sword].IsReadyToUse()
+            && !playerStats.IsDead)
         {
             if (context.performed)
             {
@@ -132,7 +132,7 @@ public class PlayerController_Sword : PlayerController
                 {
                     isSpinning = false;
                 }
-                gameManager.Player_Stats.CoolTimes[(int)Skills.SpecialAttack_Sword].ResetCoolTime();
+                playerStats.CoolTimes[(int)Skills.SpecialAttack_Sword].ResetCoolTime();
                 swordTrails[0].enabled = false;
                 swordTrails[1].enabled = false;
                 audioSource.Stop();

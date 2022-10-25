@@ -33,7 +33,6 @@ public class GameManager : Singleton<GameManager>
     public Action<int, int> onRoundStart;   // <처치해야할 적 숫자, 현재 라운드>
     public Action startSpawn;
     public Action<int> onEnemyDie;          // <남은 적 숫자>
-    public Action<int> onEnemyDieRed;       // <남은 적 숫자>
     
     public Action<int> onRoundOver;         // <현재 라운드>
     public Action onGameover;
@@ -43,7 +42,20 @@ public class GameManager : Singleton<GameManager>
     public PlayerController_Archer ArcherController => archerController;
     public CamShaker CamShaker => camShaker;
     public float[] RoundTimer => roundTimer;
-    public bool IsRoundOver => isRoundOver;
+    public bool IsRoundOver
+    {
+        get => isRoundOver;
+        private set
+        {
+            isRoundOver = value;
+            soundManager.PlaySound_UI(UIClips.Victory);
+            StartCoroutine(SlowMotion());
+            onRoundOver?.Invoke(currentRound);
+            if (currentRound == totalRounds)
+                SettingManager.Inst.CheckHighScores(roundTimer[totalRounds - 1]);
+        }
+    }
+
     public bool IsGameOver
     {   // 게임이 끝났다고 표시할 때 실행될 프로퍼티 
         set
@@ -86,31 +98,23 @@ public class GameManager : Singleton<GameManager>
                 {// 게임 오버 됐을 때는 적을 처치해도 줄어들지 않는다 
                     enemiesLeft = value;
                     if (enemiesLeft > 3)
+                    {
                         onEnemyDie?.Invoke(enemiesLeft);
+                    }
                     else if (enemiesLeft == 3)
                     {   // 3마리 남았을 때 알림을 표시 
                         uiManager.InfoPanel.ShowPanel("3 Enemies Left. Keep Up");
                         soundManager.PlaySound_UI(UIClips.TimeTicking);
-                        onEnemyDieRed?.Invoke(enemiesLeft);
+                        onEnemyDie?.Invoke(enemiesLeft);
                     }
                     else if (enemiesLeft > 0)
-                        onEnemyDieRed?.Invoke(enemiesLeft);
-                    else if (enemiesLeft == 0)
-                    {   // 모두 처치했을 때 실행할 것들 
-                        isRoundOver = true;
-                        soundManager.PlaySound_UI(UIClips.Victory);
-                        StartCoroutine(SlowMotion());
-                        onRoundOver?.Invoke(currentRound);
-                        if (currentRound == totalRounds)
-                        {
-                            SettingManager.Inst.CheckHighScores(roundTimer[totalRounds - 1]);
-                            uiManager.LeaderBoard_InGame.RefreshLeaderBoard();
-                        }
-                    }
+                        onEnemyDie?.Invoke(enemiesLeft);
+                    else if (enemiesLeft == 0) // 모두 처치했을 때 실행할 것들 
+                        IsRoundOver = true;
                 }
             }
             else
-            {
+            {//라운드가 끝나고 남은 적 수를 초기화 할 때
                 enemiesLeft = value;
                 onEnemyDie?.Invoke(enemiesLeft);
             }    
