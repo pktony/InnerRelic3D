@@ -301,6 +301,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 7803333997088277340}
     m_Modifications:
+    - target: {fileID: 1088434452, guid: 2bf8008b6d7ca43838b5b985de5ffea8, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2458948486232606374, guid: 2bf8008b6d7ca43838b5b985de5ffea8, type: 3}
       propertyPath: m_Name
       value: Model_Archer
