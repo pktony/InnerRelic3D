@@ -6,13 +6,19 @@ using UnityEngine;
 /// </summary>
 public class LockOnFollowTarget : MonoBehaviour
 {
-    public CinemachineVirtualCamera lockonCam;    
+    PlayerStats stats;
+    public CinemachineVirtualCamera lockonCam;
 
     public Vector3 offset;
+
+    private void Start()
+    {
+        stats = GameManager.Inst.Player_Stats;
+    }
 
     private void Update()
     {
         if(lockonCam.isActiveAndEnabled)
-            transform.localPosition = GameManager.Inst.Player_Stats.GetTargetDirection() + offset;
+            transform.localPosition = stats.GetTargetDirection() + offset;
     }
 }

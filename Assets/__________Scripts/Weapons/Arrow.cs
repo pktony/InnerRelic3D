@@ -26,8 +26,7 @@ public class Arrow : MonoBehaviour
     protected virtual void Start()
     {
         gameManager = GameManager.Inst;
-        rigid.AddForce(gameManager.ArcherController.CurrentVelocity.magnitude *
-            transform.forward, ForceMode.Impulse);
+        rigid.AddForce(gameManager.ArcherController.CurrentVelocity.magnitude * transform.forward, ForceMode.Impulse);
     }
 
     private void FixedUpdate()

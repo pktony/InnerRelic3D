@@ -274,9 +274,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   status: 0
-  modelPrefab: {fileID: 3811665970140444046, guid: b39de1c80dfec4b13890debac3e6c73e, type: 3}
   detectedRange: 100
-  attackRange: 2.2
+  attackRange: 2.3
   attackCoolTime: 3
 --- !u!136 &7976062525910160417
 CapsuleCollider:
@@ -304,11 +303,11 @@ NavMeshAgent:
   m_Radius: 0.5
   m_Speed: 3.5
   m_Acceleration: 8
-  avoidancePriority: 50
+  avoidancePriority: 1
   m_AngularSpeed: 300
   m_StoppingDistance: 0
   m_AutoTraverseOffMeshLink: 1
-  m_AutoBraking: 1
+  m_AutoBraking: 0
   m_AutoRepath: 1
   m_Height: 2
   m_BaseOffset: 0

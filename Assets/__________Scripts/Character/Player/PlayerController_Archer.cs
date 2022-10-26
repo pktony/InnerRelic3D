@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Lean.Transition;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -70,7 +71,11 @@ public class PlayerController_Archer : PlayerController
             // 거리 = 시간 * 속력
 
             currentVelocity += MIN_INITIAL_VELOCITY_X * transform.forward + Physics.gravity * elapsedTime;
-            currentPosition += currentVelocity * elapsedTime;
+            //currentPosition += currentVelocity * elapsedTime;
+            currentPosition = new Vector3(0,
+                 shootPositions.transform.position.y + currentVelocity.y * elapsedTime
+                    - Physics.gravity.y * Mathf.Pow(elapsedTime, 2) * 0.5f,
+                 currentVelocity.z * elapsedTime);
 
             trajectoryPoints.Add(currentPosition);
             lineRend.positionCount = trajectoryPoints.Count;
@@ -156,7 +161,8 @@ public class PlayerController_Archer : PlayerController
             isAiming = false;
             anim.SetBool("isAiming", isAiming);
             ShootArrows(1, arrowPrefab);
-            trajectoryPoints.Clear();
+            //trajectoryPoints.Clear();
+            //lineRend.positionCount = 0;
             //lineRend.enabled = false;
         }
     }

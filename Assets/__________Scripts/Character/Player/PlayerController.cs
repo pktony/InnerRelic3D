@@ -176,8 +176,8 @@ public abstract class PlayerController : MonoBehaviour
                     }
                     break;
             }
-        }
         controller.Move(moveSpeed * Time.fixedDeltaTime * moveDir);
+        }
     }
 
     private void OnMoveInput(InputAction.CallbackContext context)

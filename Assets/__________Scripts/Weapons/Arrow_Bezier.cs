@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using Cinemachine.Utility;
 using UnityEngine;
 
 public class Arrow_Bezier : Arrow
