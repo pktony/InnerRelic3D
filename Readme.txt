@@ -1,12 +1,10 @@
-3D Portfolio
+디펜스 게임 (3D Portfolio)
 
 작업 기간 : 2022.9.14. ~ 2022.10.23.
 
+주어진 시간 안에 적을 처치하고, 최고 기록을 세워라!
 
--- 최적화 매뉴얼 
-https://blog.unity.com/technology/optimize-your-mobile-game-performance-tips-on-profiling-memory-and-code-architecture
-
-
+상세 설명 (Notion) : 
 
 기능 구현 목록
  1. 플레이어
@@ -33,11 +31,5 @@ https://blog.unity.com/technology/optimize-your-mobile-game-performance-tips-on-
  4. PostProcessing
 
  5. Optimization 
-	5.1. String 최소화
-	5.2. Instantiate 최소화 
-	5.3. 불필요 Raycast Target 비활성화
-	5.4. Frame Debugger
-
-
-
-
+	5.1. String 비교 최소화
+	5.2. 오브젝트 풀
