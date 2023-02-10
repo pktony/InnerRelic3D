@@ -36,9 +36,6 @@ public class UIManager : Singleton<UIManager>
     LeaderBoard_InGame leaderBoard_InGame;
     GameoverUI gameoverUI;
 
-    [SerializeField] private string startInstruction = "KILL ALL ENEMIES IN TIME";
-    [SerializeField] private string roundEndInstruction = "VICTORY !";
-
     // 프로퍼티 -----------------------------------------------------------------
     // - 홈 화면
     public LeaderBoard_Home LeaderBoard_Home => leaderBoard_Home;
@@ -75,6 +72,7 @@ public class UIManager : Singleton<UIManager>
             roundUI = FindObjectOfType<Round_UI>();
             infoPanel = FindObjectOfType<InfoPanel>();
             leaderBoard_InGame = FindObjectOfType<LeaderBoard_InGame>();
+
             onTimerActivate = new Action<int, float>[totalRounds];
             for (int i = 0; i < totalRounds; i++)
                 onTimerActivate[i] += RefreshTimer;
@@ -82,10 +80,7 @@ public class UIManager : Singleton<UIManager>
             timerController = FindObjectOfType<TimerController>();
             timerTexts = new TextMeshProUGUI[totalRounds];
             timerTexts = timerController.GetComponentsInChildren<TextMeshProUGUI>(true);
-            //timerTexts[0].text = "Test1";
-            //timerTexts[1].text = "Test2";
-            //timerTexts[2].text = "Test3";
-
+            
             safeAreaUI = roundUI.transform.GetChild(0);
             instructionText = safeAreaUI.GetChild(5).GetComponent<TextMeshProUGUI>();
             populationText = safeAreaUI.GetChild(2).GetComponent<TextMeshProUGUI>();
@@ -113,7 +108,7 @@ public class UIManager : Singleton<UIManager>
         roundUI.gameObject.SetActive(true);
         maxEnemyText.text = "/   " + enemyPerRound.ToString();
         Color color = instructionText.color;
-        instructionText.text = startInstruction;
+        instructionText.text = DataManager.Inst.textManager.GetStringData("game_start");
 
         float timer = 0f;
         while (color.a < 1f)
@@ -177,7 +172,7 @@ public class UIManager : Singleton<UIManager>
     IEnumerator ShowVictory(int currentRound)
     { // 승리 표시 
         Color color = instructionText.color;
-        instructionText.text = roundEndInstruction;
+        instructionText.text = DataManager.Inst.textManager.GetStringData("round_end");
 
         float timer = 0f;
         while (timer < 3.0f)

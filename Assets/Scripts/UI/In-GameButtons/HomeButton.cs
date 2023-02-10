@@ -11,7 +11,7 @@ public class HomeButton : Button_Base
 {
     private void Start()
     {
-        notificationText = "Return to Home";
+        notificationText = DataManager.Inst.textManager.GetStringData("restart_button");
     }
 
     public override void OnPointerUp(PointerEventData eventData)

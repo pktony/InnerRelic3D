@@ -15,7 +15,7 @@ public class RestartButton : Button_Base
 
     private void Start()
     {
-        notificationText = "*** RESTART THE GAME ***";
+        notificationText = DataManager.Inst.textManager.GetStringData("restart_button");
     }
 
     public override void OnPointerUp(PointerEventData eventData)

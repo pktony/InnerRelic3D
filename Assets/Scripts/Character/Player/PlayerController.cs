@@ -1,7 +1,6 @@
 ﻿using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using Cinemachine;
 using System.Collections;
 using UnityEngine.SceneManagement;
 
@@ -27,7 +26,6 @@ public abstract class PlayerController : MonoBehaviour
 
     // ################### Move ######################3
     private Vector3 moveDir = Vector3.zero;
-    private float moveSpeed = 0f;
     private Quaternion relativeMoveDir = Quaternion.identity;
 
     [SerializeField] float walkSpeed = 3.0f;
@@ -72,14 +70,15 @@ public abstract class PlayerController : MonoBehaviour
 
         // 기타 --------------------------
         gravity = Physics.gravity;
-        playerWeapon = GetComponentInParent<PlayerWeapons>();
-        moveSpeed = walkSpeed;
+        playerWeapon = GetComponentInParent<PlayerWeapons>();        
     }
 
     protected virtual void Start()
     {
         playerStats = GameManager.Inst.Player_Stats;
         soundManager = SoundManager.Inst;
+
+        playerStats.moveSpeed = walkSpeed;
     }
 
     private void OnEnable()
@@ -176,7 +175,7 @@ public abstract class PlayerController : MonoBehaviour
                     }
                     break;
             }
-        controller.Move(moveSpeed * Time.fixedDeltaTime * moveDir);
+        controller.Move(playerStats.moveSpeed * Time.fixedDeltaTime * moveDir);
         }
     }
 
@@ -187,7 +186,7 @@ public abstract class PlayerController : MonoBehaviour
             Vector3 inputDir = context.ReadValue<Vector2>();
             keyboardInputDirection = new Vector3(inputDir.x, 0, inputDir.y);
             //-------------------------
-            moveSpeed = keyboardInputDirection.sqrMagnitude > 0 ?
+            playerStats.moveSpeed = keyboardInputDirection.sqrMagnitude > 0 ?
                 walkSpeed * inputDir.normalized.sqrMagnitude : 0f;
             // ------------------------
 
@@ -200,7 +199,7 @@ public abstract class PlayerController : MonoBehaviour
                 }
             }
 
-            anim.SetFloat(Speed, moveSpeed);
+            anim.SetFloat(Speed, playerStats.moveSpeed);
         }
     }
 

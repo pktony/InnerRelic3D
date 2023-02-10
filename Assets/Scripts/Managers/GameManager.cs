@@ -7,8 +7,8 @@ using UnityEngine;
 /// </summary>
 public class GameManager : Singleton<GameManager>
 {
-    UIManager uiManager;
-    SoundManager soundManager;
+    private UIManager uiManager;
+    private SoundManager soundManager;
 
     private PlayerStats mainPlayer;
     private PlayerController_Archer archerController;
@@ -41,6 +41,8 @@ public class GameManager : Singleton<GameManager>
     public PlayerStats Player_Stats => mainPlayer;
     public PlayerController_Archer ArcherController => archerController;
     public CamShaker CamShaker => camShaker;
+    public CoolTimeManager SkillManager { get; private set; }
+    public CameraManager camManager { get; private set; }
     public float[] RoundTimer => roundTimer;
     public bool IsRoundOver
     {
@@ -103,7 +105,8 @@ public class GameManager : Singleton<GameManager>
                     }
                     else if (enemiesLeft == 3)
                     {   // 3마리 남았을 때 알림을 표시 
-                        uiManager.InfoPanel.ShowPanel("3 Enemies Left. Keep Up");
+                        uiManager.InfoPanel.ShowPanel(
+                            DataManager.Inst.textManager.GetStringData("keep_up"));
                         soundManager.PlaySound_UI(UIClips.TimeTicking);
                         onEnemyDie?.Invoke(enemiesLeft);
                     }
@@ -133,6 +136,8 @@ public class GameManager : Singleton<GameManager>
         dollyController.onIntroEnd += RoundStart;
         camShaker = FindObjectOfType<CamShaker>();
         globalVolumeController = FindObjectOfType<GlobalVolumeController>();
+        SkillManager = FindObjectOfType<CoolTimeManager>();
+        camManager = GetComponent<CameraManager>();
     }
 
     private void Start()
