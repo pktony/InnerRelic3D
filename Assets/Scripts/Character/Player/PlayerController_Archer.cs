@@ -18,7 +18,7 @@ public class PlayerController_Archer : PlayerController
     private ShootPositions shootPositions;
     private Transform[] firePosition;
     private int chargeCount = 1;
-    private readonly int maxChargeCount = 30;
+    private int maxChargeCount;
     private const float MIN_INITIAL_VELOCITY_X = 10f;
     private Vector3 currentVelocity;
     private List<Vector3> trajectoryPoints;
@@ -38,16 +38,20 @@ public class PlayerController_Archer : PlayerController
         lineRend.useWorldSpace = false;
         lineRend.enabled = false;
         shootPositions = GetComponentInChildren<ShootPositions>();
-        shootPositions.InitailizeShootPosistions(maxChargeCount);
 
-        chargeWaitSeconds = new WaitForSeconds(1.0f);
         bezierWaitSeconds = new WaitForSeconds(bezierInterval);
     }
 
     protected override void Start()
     {
         base.Start();
+        var skillDat = DataManager.Inst.skillDictionary[Skills.SpecialAttack_Archer];
+        chargeWaitSeconds = new WaitForSeconds((float)skillDat[SkillStats.interval]);
+        maxChargeCount = System.Convert.ToInt32(skillDat[SkillStats.tickNum]);
+
+        shootPositions.InitailizeShootPosistions(maxChargeCount);
         firePosition = shootPositions.ActivateShootPositions(1);
+
     }
     #endregion
 
@@ -169,7 +173,7 @@ public class PlayerController_Archer : PlayerController
 
     protected override void OnSpecialAttack(InputAction.CallbackContext context)
     {
-        if (playerStats.CoolTimes[(int)Skills.SpecialAttack_Archer].IsReadyToUse())
+        if (DataManager.Inst.coolTimeDatas[(int)Skills.SpecialAttack_Archer].IsReadyToUse())
         {
             if (context.performed)
             {// Charging 애니메이션까지는 자동으로 넘어간다
@@ -201,17 +205,17 @@ public class PlayerController_Archer : PlayerController
                 {// 락온 타겟이 있으면 베지어 곡선을 따라가는 화살 발사 
                     StartCoroutine(ShootBezierArrows(chargeCount));
                 }
-                playerStats.CoolTimes[(int)Skills.SpecialAttack_Archer].ResetCoolTime();
+                DataManager.Inst.coolTimeDatas[(int)Skills.SpecialAttack_Archer].ResetCoolTime();
             }
         }
     }
 
     protected override void OnRightClick(InputAction.CallbackContext _)
     {// 회피 기술 사용 
-        if(playerStats.CoolTimes[(int)Skills.Dodge].IsReadyToUse())
+        if(DataManager.Inst.coolTimeDatas[(int)Skills.Dodge].IsReadyToUse())
         {
             anim.SetTrigger("onDodge");
-            playerStats.CoolTimes[(int)Skills.Dodge].ResetCoolTime();
+            DataManager.Inst.coolTimeDatas[(int)Skills.Dodge].ResetCoolTime();
             controller.detectCollisions = false;    // 사용 시간 동안 무적
         }
     }

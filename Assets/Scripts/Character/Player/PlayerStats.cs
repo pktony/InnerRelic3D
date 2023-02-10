@@ -2,8 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using UnityEngine;
-using Cinemachine;
-
 
 /// <summary>
 /// Player Controller에서 필요한 함수를 모아놓은 클래스
@@ -12,6 +10,7 @@ using Cinemachine;
 public class PlayerStats : MonoBehaviour, IHealth, IBattle
 {
     GameManager gameManager;
+    DataManager dataManager;
     SoundManager soundManager;
     ParryingHelper parryingHelper;
 
@@ -19,39 +18,12 @@ public class PlayerStats : MonoBehaviour, IHealth, IBattle
     Animator anim_Archer;
     AudioSource audioSource;
 
-    [SerializeField] float attackPower = 10f;
-    readonly float maxHealthPoint = 100f;
     float healthPoint = 5f;
-    float defencePower = 5f;
-    bool isDead = false;
-    Vector3 hitPoint = Vector3.zero;
-
-    private ControlMode controlMode = ControlMode.Normal;
     private Weapons weaponType = Weapons.Sword;
-
-    private GameObject mainCam;
 
     // ################ Target Lockon
     [SerializeField] float lockOnRadius = 20f;
     private GameObject lockOnEffect;
-    private Transform lockonFollowTarget;
-    private Transform lockonTarget;
-    protected CinemachineVirtualCamera lockonCam;
-
-    //Skill Data
-    CoolTimeManager coolTimeUIManager;
-    public SkillData[] skillDatas;
-    private CoolTimeData[] coolTimeDatas;
-    // [0] heal
-    // [1] sword
-    // [2] archer
-    // [3] dodge
-
-    private GameObject[] particles = new GameObject[4];
-    // [0] use
-    // [1] tick
-    // [2] charge
-    // [3] Parrying
 
     // Heal Skill
     private float healAmount;
@@ -60,12 +32,12 @@ public class PlayerStats : MonoBehaviour, IHealth, IBattle
     private WaitForSeconds healWaitSeconds;
 
     // Invincible Skill
-    private bool isDefending = false;
     private bool isParry = false;
-    private float parryDuration = 0.5f;
     WaitForSeconds parrywaitSeconds;
     IEnumerator parryingCoroutine;
 
+    // Particles
+    public GameObject[] Particles { get; private set; } 
     #region 프로퍼티 #############################################################
     public float HP
     {
@@ -82,25 +54,25 @@ public class PlayerStats : MonoBehaviour, IHealth, IBattle
                 }
                 else if(value > healthPoint)
                 { // heal
-                    particles[1].transform.position = transform.position + Vector3.up;
-                    particles[1].SetActive(true);
+                    Particles[(int)ParticleList.healTick].transform.position = transform.position + Vector3.up;
+                    Particles[(int)ParticleList.healTick].SetActive(true);
                 }
                 else
                 { // 방어 중 공격을 받았을 때 
                     anim_Sword.SetTrigger("onHit");
                     PlayRandomHitSound();
                 }
-                healthPoint = (int)Mathf.Clamp(value, 0f, maxHealthPoint);
+                healthPoint = (int)Mathf.Clamp(value, 0f, MaxHP);
                 //Debug.Log($"Player HP : {healthPoint}");
                 onHealthChange?.Invoke();
             }
             else
             {// 죽을 때 실행
-                if (!isDead)
+                if (!IsDead)
                 {// 연속으로 죽는거 방지 
-                    isDead = true;
-                    anim_Sword.SetBool("isDead", isDead);
-                    anim_Archer.SetBool("isDead", isDead);
+                    IsDead = true;
+                    anim_Sword.SetBool("isDead", IsDead);
+                    anim_Archer.SetBool("isDead", IsDead);
                     anim_Archer.SetTrigger("onDie");
                     anim_Sword.SetTrigger("onDie");
                     gameManager.IsGameOver = true;
@@ -109,37 +81,17 @@ public class PlayerStats : MonoBehaviour, IHealth, IBattle
         }
     }
 
-    public bool IsDead => isDead;
-    public Vector3 HitPoint
-    {
-        get => hitPoint;
-        set { hitPoint = value; }
-    }
+    public bool IsDead { get; private set; }
+    public Vector3 HitPoint { get; set; }
+    public Transform lockonFollowTarget { get; private set; }
+    public Transform LockonTarget { get; private set; }
+    public ControlMode ControlMode { get; set; }
 
-    public Transform LockonTarget
-    {
-        get => lockonTarget;
-        set
-        {
-            lockonTarget = value;
-        }
-    }
-    public ControlMode ControlMode
-    {
-        get => controlMode;
-        set
-        {
-            controlMode = value;
-        }
-    }
-
-    public float MaxHP => maxHealthPoint;
-    public float AttackPower => attackPower;
-
-    public CoolTimeData[] CoolTimes => coolTimeDatas;
-    public GameObject[] Particles => particles;
-
-    public bool IsDefending => isDefending;
+    public float MaxHP { get; private set; }
+    public float AttackPower { get; private set; }
+    public float DefencePower { get; private set; }
+    public float moveSpeed { get; set; }
+    public bool IsDefending { get; private set; }
     #endregion
 
     #region 델리게이트 ###########################################################
@@ -157,65 +109,28 @@ public class PlayerStats : MonoBehaviour, IHealth, IBattle
         lockonFollowTarget = transform.GetChild(2);
         lockOnEffect = transform.GetChild(4).gameObject;
         lockOnEffect.SetActive(false);
-
-        // 카메라 ---------------------------------------------------------------
-        mainCam = FindObjectOfType<MainCam>(true).gameObject;
-        CinemachineVirtualCamera cinemachine = mainCam.GetComponent<CinemachineVirtualCamera>();
-        cinemachine.Follow = this.transform;
-        cinemachine.LookAt = this.transform;
-        lockonCam = FindObjectOfType<LockonCam>(true).GetComponent<CinemachineVirtualCamera>();
-        lockonCam.Follow = lockonFollowTarget;
-        mainCam.SetActive(false);
-        lockonCam.gameObject.SetActive(false);
-
-        // Heal Skll ----------------------------------------------------------
-        SkillData_Heal heal = skillDatas[0] as SkillData_Heal;
-        healAmount = heal.healAmount;
-        healTickNum = heal.healTickNum;
-        healInterval = heal.healInterval;
-        healWaitSeconds = new WaitForSeconds(healInterval);
-        
-        // Sword Defend Skill -------------------------------------------------
-        parrywaitSeconds = new WaitForSeconds(parryDuration);
-        parryingCoroutine = ParryingTimer();
-        parryingHelper = GetComponentInChildren<ParryingHelper>();
-
-        // Cool Time Data Initialization --------------------------------------
-        coolTimeUIManager = FindObjectOfType<CoolTimeManager>();
-        coolTimeUIManager.InitializeUIs();
-        coolTimeDatas = new CoolTimeData[(int)Skills.SkillCount];
-        for (int i = 0; i < (int)Skills.SkillCount; i++)
-        {
-            coolTimeDatas[i] = new CoolTimeData(skillDatas[i]);
-            coolTimeDatas[i].onCoolTimeChange += coolTimeUIManager[i].RefreshUI;
-        }
-
-        // Particle 초기화 ------------------------------------------------------
-        // --- 힐 사용 
-        particles[0] = InitializeParticles(heal.skillParticles[0]);
-        // --- 힐 틱 
-        particles[1] = InitializeParticles(heal.skillParticles[1], false);
-        // --- 차징 
-        particles[2] = InitializeParticles(skillDatas[(int)Skills.SpecialAttack_Archer].skillParticles[0]);
-        // --- 패링
-        particles[3] = InitializeParticles(skillDatas[(int)Skills.Defence].skillParticles[0]);
     }
-    
     private void Start()
     {
         gameManager = GameManager.Inst;
         soundManager = SoundManager.Inst;
+        dataManager = DataManager.Inst;
 
-        HP = maxHealthPoint;
-    }
-
-    private void Update()
-    {
-        foreach(var data in coolTimeDatas)
+        InitializeCharacterStats();
+        InitializeCommonSkills();
+        //// Particle 초기화 ----------------------------------------------------
+        Particles = new GameObject[(int)ParticleList.particleCount];
+        for (int i = 0; i < Particles.Length; i++)
         {
-            data.CurrentCoolTime -= Time.deltaTime;
+            if (i == (int)ParticleList.healTick)
+                Particles[i] = InitializeParticles(dataManager.particles[i], false);
+            else
+                Particles[i] = InitializeParticles(dataManager.particles[i]);
         }
+
+        HP = MaxHP;
     }
+
     #endregion
 
     #region IBATTLE
@@ -229,15 +144,15 @@ public class PlayerStats : MonoBehaviour, IHealth, IBattle
             {// 공격한 사람이 넉백 
                 ParryAction();
             }
-            target.TakeDamage(attackPower);
+            target.TakeDamage(AttackPower);
         }
     }
 
     public void TakeDamage(float damage)
     {// 피격 처리 
-        if (!isDefending)
+        if (!IsDefending)
         {// 방어 중이 아닐 때 HP가 깎임 
-            HP -= (damage - defencePower);
+            HP -= (damage - DefencePower);
         }
         else
         {// 방어 중일때는 피격받지 않고 
@@ -245,8 +160,8 @@ public class PlayerStats : MonoBehaviour, IHealth, IBattle
             {
                 if(isParry)
                 {// 패링 성공 시, 상대방에 패링액션을 한다 
-                    particles[3].transform.position = hitPoint;
-                    particles[3].SetActive(true);
+                    Particles[(int)ParticleList.specialParrying].transform.position = HitPoint;
+                    Particles[(int)ParticleList.specialParrying].SetActive(true);
                     gameManager.CamShaker.ShakeCamera(0.3f, 0.5f);
                     soundManager.PlaySound_Player(audioSource, PlayerClips.Defence);
                     isParry = false;
@@ -259,6 +174,7 @@ public class PlayerStats : MonoBehaviour, IHealth, IBattle
     public void ParryAction()
     {
         //넉백, 잠시 기절
+        // 적은 패링 없음
         Debug.Log("Parrying Activated");
     }
     #endregion
@@ -268,10 +184,10 @@ public class PlayerStats : MonoBehaviour, IHealth, IBattle
 
     public void Heal()
     {
-        if (coolTimeDatas[(int)Skills.Heal].IsReadyToUse())
+        if (dataManager.coolTimeDatas[(int)Skills.Heal].IsReadyToUse())
         {
-            particles[0].SetActive(true);
-            coolTimeDatas[(int)Skills.Heal].ResetCoolTime();
+            Particles[(int)ParticleList.healUse].SetActive(true);
+            dataManager.coolTimeDatas[(int)Skills.Heal].ResetCoolTime();
             StartCoroutine(SlowHeal());
         }
     }
@@ -293,7 +209,7 @@ public class PlayerStats : MonoBehaviour, IHealth, IBattle
         // Length 로 확인하려면 nonAlloc을 사용할 수 없음 
         if (lockonCollider.Length > 0)
         {// 락온 대상이 있음 
-            if (lockonTarget == null)
+            if (LockonTarget == null)
             {// 현재 락온돼있는 타겟이 없으면 
                 float closestDistance = float.MaxValue;
                 foreach (Collider coll in lockonCollider)
@@ -304,12 +220,12 @@ public class PlayerStats : MonoBehaviour, IHealth, IBattle
                     if (distanceSqr < closestDistance)
                     {// 거리가 더 짧을 경우 새로운 값 저장 
                         closestDistance = distanceSqr;
-                        lockonTarget = coll.transform;
+                        LockonTarget = coll.transform;
                     }
                 }
-                if (lockonTarget != null)
+                if (LockonTarget != null)
                 {
-                    Transform target = lockonTarget;
+                    Transform target = LockonTarget;
                     if (target.TryGetComponent<Enemy>(out Enemy enemy))
                         enemy.onDie += LockOff;
                     transform.rotation = Quaternion.LookRotation(target.position - transform.position);
@@ -319,12 +235,10 @@ public class PlayerStats : MonoBehaviour, IHealth, IBattle
                     lockOnEffect.transform.position = lockOnEffectParent.position + new Vector3(0f, 0f, 0.6f);
                     lockOnEffect.SetActive(true);
 
-                    mainCam.SetActive(false);
                     lockonFollowTarget.gameObject.SetActive(true);
-                    lockonCam.LookAt = target;
-                    lockonCam.gameObject.SetActive(true);
+                    gameManager.camManager.Lockon(LockonTarget);
 
-                    controlMode = ControlMode.LockedOn;
+                    ControlMode = ControlMode.LockedOn;
                     soundManager.PlaySound_Player(audioSource, PlayerClips.Lockon);
                 }
             }
@@ -344,17 +258,14 @@ public class PlayerStats : MonoBehaviour, IHealth, IBattle
     {
         if (LockonTarget != null)
         {
-            lockonTarget = null;
+            LockonTarget = null;
             lockOnEffect.SetActive(false);
             lockOnEffect.transform.parent = null;
 
             lockonFollowTarget.gameObject.SetActive(false);
-            lockonCam.LookAt = null;
-            lockonCam.gameObject.SetActive(false);
-            mainCam.transform.position = lockonCam.transform.position;
-            mainCam.SetActive(true);
+            gameManager.camManager.LockOff();
 
-            controlMode = ControlMode.Normal;
+            ControlMode = ControlMode.Normal;
         }
     }
 
@@ -363,11 +274,11 @@ public class PlayerStats : MonoBehaviour, IHealth, IBattle
         isParry = true;
         parryingHelper.Coll.enabled = true;
         StartCoroutine(parryingCoroutine);
-        isDefending = true;
+        IsDefending = true;
     }
     public void UnDefend()
     {
-        isDefending = false;
+        IsDefending = false;
         StopCoroutine(parryingCoroutine);
         parryingHelper.Coll.enabled = false;
         isParry = false;
@@ -375,6 +286,30 @@ public class PlayerStats : MonoBehaviour, IHealth, IBattle
     #endregion
 
     #region PRIVATE 함수 #######################################################
+    private void InitializeCharacterStats()
+    {
+        MaxHP = (float)(dataManager.statDictionary[Weapons.Sword][statType.maxHP]);
+        AttackPower = (float)dataManager.statDictionary[Weapons.Sword][statType.attackPower];
+        DefencePower = (float)dataManager.statDictionary[Weapons.Sword][statType.defencePower];
+        moveSpeed = (float)dataManager.statDictionary[Weapons.Sword][statType.moveSpeed];
+    }
+
+    private void InitializeCommonSkills()
+    {
+        // Heal Skll ----------------------------------------------------------
+        var healData = dataManager.skillDictionary[Skills.Heal];
+        healAmount = (float)healData[SkillStats.amount];
+        healTickNum = (float)healData[SkillStats.tickNum];
+        healInterval = (float)healData[SkillStats.interval];
+        healWaitSeconds = new WaitForSeconds(healInterval);
+
+        // Sword Defend Skill -------------------------------------------------
+        float parryDuration = (float)dataManager.skillDictionary[Skills.Defence][SkillStats.amount];
+        parrywaitSeconds = new WaitForSeconds(parryDuration);
+        parryingCoroutine = ParryingTimer();
+        parryingHelper = GetComponentInChildren<ParryingHelper>();
+    }
+
     private IEnumerator SlowHeal()
     {// 일정 시간 동안 조금씩 힐해주는 함수 
         int counter = 0;
@@ -413,4 +348,3 @@ public class PlayerStats : MonoBehaviour, IHealth, IBattle
     }
     #endregion
 }
-

@@ -151,7 +151,8 @@ public class SettingManager : Singleton<SettingManager>
                 scores[i] = newScore;
                 SaveGameRank();
                 UIManager.Inst.LeaderBoard_InGame.RefreshLeaderBoard();
-                UIManager.Inst.InfoPanel.ShowPanel("New High Score !");
+                UIManager.Inst.InfoPanel.ShowPanel(
+                    DataManager.Inst.textManager.GetStringData("new_high_score"));
                 SoundManager.Inst.PlaySound_UI(UIClips.Fanfare);
                 break;
             }

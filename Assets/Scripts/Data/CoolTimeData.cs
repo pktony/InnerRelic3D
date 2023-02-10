@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class CoolTimeData
 {
-    private SkillData data;
-
     private readonly float coolTime;
     private float currentCoolTime = 0f;
 
@@ -25,10 +23,9 @@ public class CoolTimeData
     /// 쿨타임 데이터 생성자 
     /// </summary>
     /// <param name="_data"></param>
-    public CoolTimeData(SkillData _data)
+    public CoolTimeData(float coolTime)
     {
-        data = _data;
-        coolTime = data.coolTime;
+        this.coolTime = coolTime;
         currentCoolTime = 0f;
     }
 

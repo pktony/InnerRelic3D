@@ -52,7 +52,7 @@ public class PlayerController_Sword : PlayerController
             spinTimer += 1.0f;
             if (spinTimer > dizzyTime)
             {
-                playerStats.CoolTimes[(int)Skills.SpecialAttack_Sword].ResetCoolTime();
+                DataManager.Inst.coolTimeDatas[(int)Skills.SpecialAttack_Sword].ResetCoolTime();
                 isDizzy = true;
                 isSpinning = false;
                 StartCoroutine(FreezeControl(2.0f));
@@ -114,7 +114,7 @@ public class PlayerController_Sword : PlayerController
 
     protected override void OnSpecialAttack(InputAction.CallbackContext context)
     {
-        if (playerStats.CoolTimes[(int)Skills.SpecialAttack_Sword].IsReadyToUse()
+        if (DataManager.Inst.coolTimeDatas[(int)Skills.SpecialAttack_Sword].IsReadyToUse()
             && !playerStats.IsDead)
         {
             if (context.performed)
@@ -132,7 +132,7 @@ public class PlayerController_Sword : PlayerController
                 {
                     isSpinning = false;
                 }
-                playerStats.CoolTimes[(int)Skills.SpecialAttack_Sword].ResetCoolTime();
+                DataManager.Inst.coolTimeDatas[(int)Skills.SpecialAttack_Sword].ResetCoolTime();
                 swordTrails[0].enabled = false;
                 swordTrails[1].enabled = false;
                 audioSource.Stop();

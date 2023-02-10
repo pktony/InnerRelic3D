@@ -1,0 +1,6 @@
+skillName,coolTime,particles,interval,amount,tickNum
+Heal,10,HealUse#HealTick,1.0,15,5
+Special_Sword,5,NA,1.0,3.0,NA
+Special_Archer,5,Charge,1,5,30
+Defence,0,ParryingSuccess,NA,0.5,NA
+Dodge,5,NA,NA,NA,NA

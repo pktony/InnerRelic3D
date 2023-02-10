@@ -13,7 +13,7 @@ public class LeaderBoardButton_InGame : Button_Base
     void Start()
     {
         uiManager = UIManager.Inst;
-        notificationText = "Leader Board";
+        notificationText = DataManager.Inst.textManager.GetStringData("Leaderboard");
     }
 
     public override void OnPointerUp(PointerEventData eventData)
