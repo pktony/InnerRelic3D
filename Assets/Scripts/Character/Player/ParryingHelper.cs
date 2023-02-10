@@ -8,13 +8,11 @@ using UnityEngine;
 /// </summary>
 public class ParryingHelper : MonoBehaviour
 {
-    Collider coll;
-
-    public Collider Coll => coll;
+    public Collider Coll { get; private set; }
 
     private void Awake()
     {
-        coll = GetComponent<Collider>();
+        Coll = GetComponent<Collider>();
     }
 
     private void OnTriggerEnter(Collider other)

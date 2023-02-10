@@ -7,6 +7,16 @@ using UnityEngine;
 /// Enums 모음집
 /// </summary>
 
+public enum SkillStats
+{
+    name,
+    coolTime,
+    particles,
+    interval,
+    amount,
+    tickNum,
+}
+
 public enum ControlMode : byte 
 {
     Normal = 0, 

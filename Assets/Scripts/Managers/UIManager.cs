@@ -75,6 +75,7 @@ public class UIManager : Singleton<UIManager>
             roundUI = FindObjectOfType<Round_UI>();
             infoPanel = FindObjectOfType<InfoPanel>();
             leaderBoard_InGame = FindObjectOfType<LeaderBoard_InGame>();
+
             onTimerActivate = new Action<int, float>[totalRounds];
             for (int i = 0; i < totalRounds; i++)
                 onTimerActivate[i] += RefreshTimer;
@@ -82,10 +83,7 @@ public class UIManager : Singleton<UIManager>
             timerController = FindObjectOfType<TimerController>();
             timerTexts = new TextMeshProUGUI[totalRounds];
             timerTexts = timerController.GetComponentsInChildren<TextMeshProUGUI>(true);
-            //timerTexts[0].text = "Test1";
-            //timerTexts[1].text = "Test2";
-            //timerTexts[2].text = "Test3";
-
+            
             safeAreaUI = roundUI.transform.GetChild(0);
             instructionText = safeAreaUI.GetChild(5).GetComponent<TextMeshProUGUI>();
             populationText = safeAreaUI.GetChild(2).GetComponent<TextMeshProUGUI>();

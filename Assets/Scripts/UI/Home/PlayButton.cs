@@ -6,7 +6,7 @@ public class PlayButton : MonoBehaviour, IPointerClickHandler
 {
     public void OnPointerClick(PointerEventData eventData)
     {
-        SceneManager.LoadScene("Stage");
+        SceneManager.LoadSceneAsync("Stage");
         SoundManager.Inst.PlaySound_UI(UIClips.Click);
     }
 }

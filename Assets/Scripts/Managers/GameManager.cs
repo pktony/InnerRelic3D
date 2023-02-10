@@ -7,8 +7,8 @@ using UnityEngine;
 /// </summary>
 public class GameManager : Singleton<GameManager>
 {
-    UIManager uiManager;
-    SoundManager soundManager;
+    private UIManager uiManager;
+    private SoundManager soundManager;
 
     private PlayerStats mainPlayer;
     private PlayerController_Archer archerController;
@@ -41,6 +41,8 @@ public class GameManager : Singleton<GameManager>
     public PlayerStats Player_Stats => mainPlayer;
     public PlayerController_Archer ArcherController => archerController;
     public CamShaker CamShaker => camShaker;
+    public CoolTimeManager SkillManager { get; private set; }
+    public CameraManager camManager { get; private set; }
     public float[] RoundTimer => roundTimer;
     public bool IsRoundOver
     {
@@ -133,6 +135,8 @@ public class GameManager : Singleton<GameManager>
         dollyController.onIntroEnd += RoundStart;
         camShaker = FindObjectOfType<CamShaker>();
         globalVolumeController = FindObjectOfType<GlobalVolumeController>();
+        SkillManager = FindObjectOfType<CoolTimeManager>();
+        camManager = GetComponent<CameraManager>();
     }
 
     private void Start()
