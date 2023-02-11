@@ -21,7 +21,6 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
 
     [Header("Basic Stats")]
     float healthPoint = 100f;
-    float maxHealthPoint = 100f;
     float moveSpeed = 3.0f;
 
     [Header("AI")]
@@ -43,7 +42,6 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
     [Header("Attack")]
     [SerializeField] float attackCoolTime = 5.0f;
     float attackTimer = 0f;
-    float attackPower = 10f;
     Quaternion targetAngle = Quaternion.identity;
     #endregion
 
@@ -63,7 +61,7 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
     private readonly int OnDie = Animator.StringToHash("onDie");
     private readonly int IsMoving = Animator.StringToHash("isMoving");
     private readonly int CurrentStatus = Animator.StringToHash("CurrentStatus");
-    #endregion  
+    #endregion
     
     #region IHEALTH
     public float HP
@@ -71,11 +69,11 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
         get => healthPoint;
         set
         {
-            healthPoint = Mathf.Clamp(value, 0f, maxHealthPoint);
+            healthPoint = Mathf.Clamp(value, 0f, MaxHP);
             if (healthPoint > 0f)
             {
                 anim.SetTrigger(OnHit);
-                onHealthChange?.Invoke();
+                onHealthChange?.Invoke(healthPoint, MaxHP);
             }
             else
             {
@@ -85,8 +83,8 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
         }
     }
 
-    public float MaxHP => maxHealthPoint;
-    public Action onHealthChange { get; set; }
+    public float MaxHP { get; private set; }
+    public Action<float, float> onHealthChange { get; set; }
     #endregion
 
     #region IBATTLE
@@ -98,7 +96,7 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
             {// 공격한 사람이 넉백 
                 ParryAction();
             }
-            target.TakeDamage(attackPower);
+            target.TakeDamage(AttackPower);
         }
     }
 
@@ -126,7 +124,7 @@ public class Enemy : MonoBehaviour, IHealth, IBattle
     
     #endregion
 
-    public float AttackPower => attackPower;
+    public float AttackPower { get; private set; }
     public Action onDie;
 
     #region UNITY EVENT 함수 ###################################################

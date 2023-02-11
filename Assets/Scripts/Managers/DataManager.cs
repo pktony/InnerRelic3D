@@ -39,6 +39,7 @@ public class DataManager : Singleton<DataManager>
     public List<GameObject> particles { get; private set; }
     public Dictionary<Skills, Dictionary<SkillStats, object>> skillDictionary { get; private set; }
     public Dictionary<Weapons, Dictionary<statType, object>> statDictionary { get; private set; }
+    public Dictionary<string, string> stringData { get; private set; }
     #endregion
 
     protected override void Awake()
@@ -150,5 +151,10 @@ public class DataManager : Singleton<DataManager>
             }
             cursor++;
         }
+    }
+
+    private void InitializeStringDatas()
+    {
+
     }
 }

@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 
 public class PlayerController_Sword : PlayerController
 {
-    [SerializeField] private float dizzyTime = 3.0f;
+    private float dizzyTime = 3.0f;
 
     // Special Attack
     private bool isSpinning = false;
@@ -114,32 +114,31 @@ public class PlayerController_Sword : PlayerController
 
     protected override void OnSpecialAttack(InputAction.CallbackContext context)
     {
-        if (DataManager.Inst.coolTimeDatas[(int)Skills.SpecialAttack_Sword].IsReadyToUse()
-            && !playerStats.IsDead)
+        if (playerStats.IsDead) return;
+        if (!dataManager.coolTimeDatas[(int)Skills.SpecialAttack_Sword].IsReadyToUse()) return;
+
+        if (context.performed)
         {
-            if (context.performed)
-            {
-                isSpinning = true;
-                swordTrails[0].enabled = true;
-                swordTrails[1].enabled = true;
-                StartCoroutine(SpinTimer());
-                soundManager.PlaySound_Player(audioSource, PlayerClips.SpecialAttack_Demacia);
-                soundManager.PlaySound_Player(audioSource, PlayerClips.SpecialAttack_Sword, true);
-            }
-            else if (context.canceled)
-            {// 공격 취소
-                if (!isDizzy)
-                {
-                    isSpinning = false;
-                }
-                DataManager.Inst.coolTimeDatas[(int)Skills.SpecialAttack_Sword].ResetCoolTime();
-                swordTrails[0].enabled = false;
-                swordTrails[1].enabled = false;
-                audioSource.Stop();
-                spinTimer = 0f;
-            }
-            anim.SetBool(IsSpecialAttack, isSpinning);
+            isSpinning = true;
+            swordTrails[0].enabled = true;
+            swordTrails[1].enabled = true;
+            StartCoroutine(SpinTimer());
+            soundManager.PlaySound_Player(audioSource, PlayerClips.SpecialAttack_Demacia);
+            soundManager.PlaySound_Player(audioSource, PlayerClips.SpecialAttack_Sword, true);
         }
+        else if (context.canceled)
+        {// 공격 취소
+            if (!isDizzy)
+            {
+                isSpinning = false;
+            }
+            dataManager.coolTimeDatas[(int)Skills.SpecialAttack_Sword].ResetCoolTime();
+            swordTrails[0].enabled = false;
+            swordTrails[1].enabled = false;
+            audioSource.Stop();
+            spinTimer = 0f;
+        }
+        anim.SetBool(IsSpecialAttack, isSpinning);
     }
     #endregion
 }

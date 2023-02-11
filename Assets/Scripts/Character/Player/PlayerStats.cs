@@ -64,7 +64,7 @@ public class PlayerStats : MonoBehaviour, IHealth, IBattle
                 }
                 healthPoint = (int)Mathf.Clamp(value, 0f, MaxHP);
                 //Debug.Log($"Player HP : {healthPoint}");
-                onHealthChange?.Invoke();
+                onHealthChange?.Invoke(healthPoint, MaxHP);
             }
             else
             {// 죽을 때 실행
@@ -95,7 +95,7 @@ public class PlayerStats : MonoBehaviour, IHealth, IBattle
     #endregion
 
     #region 델리게이트 ###########################################################
-    public Action onHealthChange { get; set; }
+    public Action<float, float> onHealthChange { get; set; }
     #endregion
 
     #region UNITY EVENT 함수 ###################################################

@@ -7,24 +7,22 @@ using TMPro;
 
 public class Player_UI : MonoBehaviour
 {
-    PlayerStats player;
-
     // ##### HP #########
     Image hpImg;
     TextMeshProUGUI hpText;
 
     private void Awake()
     {
-        player = FindObjectOfType<PlayerStats>();
+        PlayerStats player = FindObjectOfType<PlayerStats>();
         player.onHealthChange += RefreshHPUI;
 
         hpImg = transform.GetChild(0).GetComponent<Image>();
         hpText = transform.GetChild(2).GetComponent<TextMeshProUGUI>();
     }
 
-    private void RefreshHPUI()
+    private void RefreshHPUI(float currentHP, float maxHP)
     {
-        hpImg.fillAmount = player.HP / player.MaxHP;
-        hpText.text = player.HP.ToString();
+        hpImg.fillAmount = currentHP / maxHP;
+        hpText.text = currentHP.ToString();
     }
 }

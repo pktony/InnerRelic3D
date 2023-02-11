@@ -13,10 +13,6 @@ using UnityEngine.SceneManagement;
 public class UIManager : Singleton<UIManager>
 {
     GameManager gameManager;
-    // 홈 화면 ------------------------------------------------------------------
-    LeaderBoard_Home leaderBoard_Home;
-    SettingMain settingMain;
-    HomeButtons homeButtons;
 
     // 인게임 -------------------------------------------------------------------
     int totalRounds;
@@ -30,25 +26,21 @@ public class UIManager : Singleton<UIManager>
     TextMeshProUGUI populationText;
     Animator populationAnimator;
 
-    Round_UI roundUI;
-    InfoPanel infoPanel;
     TimerController timerController;
-    LeaderBoard_InGame leaderBoard_InGame;
-    GameoverUI gameoverUI;
 
     [SerializeField] private string startInstruction = "KILL ALL ENEMIES IN TIME";
     [SerializeField] private string roundEndInstruction = "VICTORY !";
 
     // 프로퍼티 -----------------------------------------------------------------
     // - 홈 화면
-    public LeaderBoard_Home LeaderBoard_Home => leaderBoard_Home;
-    public SettingMain SettingMain => settingMain;
-    public HomeButtons HomeButtons => homeButtons;
-    public InfoPanel InfoPanel => infoPanel;
+    public LeaderBoard_Home LeaderBoard_Home { get; private set; }
+    public SettingMain SettingMain { get; private set; }
+    public HomeButtons HomeButtons { get; private set; }
+    public InfoPanel InfoPanel { get; private set; }
     // - 인 게임
-    public Round_UI RoundUI => roundUI;
-    public LeaderBoard_InGame LeaderBoard_InGame => leaderBoard_InGame;
-    public GameoverUI GameoverUI => gameoverUI;
+    public Round_UI RoundUI { get; private set; }
+    public LeaderBoard_InGame LeaderBoard_InGame { get; private set; }
+    public GameoverUI GameoverUI { get; private set; }
 
     // 델리게이트 ----------------------------------------------------------------
     public Action<int, float>[] onTimerActivate;
@@ -63,18 +55,18 @@ public class UIManager : Singleton<UIManager>
     {
         if(arg0 == SceneManager.GetSceneByName("Home"))
         {
-            leaderBoard_Home = FindObjectOfType<LeaderBoard_Home>();
-            settingMain = FindObjectOfType<SettingMain>();
-            homeButtons = FindObjectOfType<HomeButtons>();
+            LeaderBoard_Home = FindObjectOfType<LeaderBoard_Home>();
+            SettingMain = FindObjectOfType<SettingMain>();
+            HomeButtons = FindObjectOfType<HomeButtons>();
         }
         else if(arg0 == SceneManager.GetSceneByName("Stage"))
         {
             gameManager = GameManager.Inst;
             totalRounds = gameManager.TotalRounds;
 
-            roundUI = FindObjectOfType<Round_UI>();
-            infoPanel = FindObjectOfType<InfoPanel>();
-            leaderBoard_InGame = FindObjectOfType<LeaderBoard_InGame>();
+            RoundUI = FindObjectOfType<Round_UI>();
+            InfoPanel = FindObjectOfType<InfoPanel>();
+            LeaderBoard_InGame = FindObjectOfType<LeaderBoard_InGame>();
 
             onTimerActivate = new Action<int, float>[totalRounds];
             for (int i = 0; i < totalRounds; i++)
@@ -84,14 +76,14 @@ public class UIManager : Singleton<UIManager>
             timerTexts = new TextMeshProUGUI[totalRounds];
             timerTexts = timerController.GetComponentsInChildren<TextMeshProUGUI>(true);
             
-            safeAreaUI = roundUI.transform.GetChild(0);
+            safeAreaUI = RoundUI.transform.GetChild(0);
             instructionText = safeAreaUI.GetChild(5).GetComponent<TextMeshProUGUI>();
             populationText = safeAreaUI.GetChild(2).GetComponent<TextMeshProUGUI>();
             populationAnimator = populationText.GetComponent<Animator>();
             maxEnemyText = safeAreaUI.GetChild(3).GetComponent<TextMeshProUGUI>();
 
-            gameoverUI = FindObjectOfType<GameoverUI>();
-            roundUI.gameObject.SetActive(false);
+            GameoverUI = FindObjectOfType<GameoverUI>();
+            RoundUI.gameObject.SetActive(false);
 
             gameManager.onRoundStart += OnGameStart;
             gameManager.onEnemyDie += RefreshPopulationText;
@@ -108,7 +100,7 @@ public class UIManager : Singleton<UIManager>
 
     IEnumerator ShowStartInstruction(int enemyPerRound, int enemies)
     {// 임무 / 라운드 표시
-        roundUI.gameObject.SetActive(true);
+        RoundUI.gameObject.SetActive(true);
         maxEnemyText.text = "/   " + enemyPerRound.ToString();
         Color color = instructionText.color;
         instructionText.text = startInstruction;
@@ -124,7 +116,7 @@ public class UIManager : Singleton<UIManager>
         yield return new WaitForSeconds(1.0f);
 
         //Show Round Number
-        roundUI.RefreshRoundUI();
+        RoundUI.RefreshRoundUI();
         RefreshPopulationText(enemies);
 
         while (color.a > 0f)
@@ -169,7 +161,7 @@ public class UIManager : Singleton<UIManager>
 
     private void OnGameOver()
     {// 게임오버 ui 표시
-        StartCoroutine(gameoverUI.ShowGameoverText());
+        StartCoroutine(GameoverUI.ShowGameoverText());
     }
 
     IEnumerator ShowVictory(int currentRound)
@@ -192,7 +184,7 @@ public class UIManager : Singleton<UIManager>
         }
         else
         {// 게임 끝 
-            gameoverUI.ShowGameoverButtons();
+            GameoverUI.ShowGameoverButtons();
         }
     }
 }
