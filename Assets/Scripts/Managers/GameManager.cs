@@ -105,7 +105,8 @@ public class GameManager : Singleton<GameManager>
                     }
                     else if (enemiesLeft == 3)
                     {   // 3마리 남았을 때 알림을 표시 
-                        uiManager.InfoPanel.ShowPanel("3 Enemies Left. Keep Up");
+                        uiManager.InfoPanel.ShowPanel(
+                            DataManager.Inst.textManager.GetStringData("keep_up"));
                         soundManager.PlaySound_UI(UIClips.TimeTicking);
                         onEnemyDie?.Invoke(enemiesLeft);
                     }

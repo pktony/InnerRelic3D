@@ -28,9 +28,6 @@ public class UIManager : Singleton<UIManager>
 
     TimerController timerController;
 
-    [SerializeField] private string startInstruction = "KILL ALL ENEMIES IN TIME";
-    [SerializeField] private string roundEndInstruction = "VICTORY !";
-
     // 프로퍼티 -----------------------------------------------------------------
     // - 홈 화면
     public LeaderBoard_Home LeaderBoard_Home { get; private set; }
@@ -103,7 +100,7 @@ public class UIManager : Singleton<UIManager>
         RoundUI.gameObject.SetActive(true);
         maxEnemyText.text = "/   " + enemyPerRound.ToString();
         Color color = instructionText.color;
-        instructionText.text = startInstruction;
+        instructionText.text = DataManager.Inst.textManager.GetStringData("game_start");
 
         float timer = 0f;
         while (color.a < 1f)
@@ -167,7 +164,7 @@ public class UIManager : Singleton<UIManager>
     IEnumerator ShowVictory(int currentRound)
     { // 승리 표시 
         Color color = instructionText.color;
-        instructionText.text = roundEndInstruction;
+        instructionText.text = DataManager.Inst.textManager.GetStringData("round_end");
 
         float timer = 0f;
         while (timer < 3.0f)

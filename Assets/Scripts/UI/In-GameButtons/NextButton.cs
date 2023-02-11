@@ -10,7 +10,7 @@ public class NextButton : Button_Base
 {
     private void Start()
     {
-        notificationText = "To the Next Round";
+        notificationText = DataManager.Inst.textManager.GetStringData("next_round_button");
     }
 
     public override void OnPointerUp(PointerEventData eventData)

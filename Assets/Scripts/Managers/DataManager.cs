@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Threading.Tasks;
 using System.IO;
 
 public enum ParticleList
@@ -28,6 +29,7 @@ public class DataManager : Singleton<DataManager>
     private readonly string path = "/Datas/";
     private readonly string skillDataCSV = "SkillData.csv";
     private readonly string characterDataCSV = "CharacterData.csv";
+    private readonly string stringDataCSV = "stringData.csv";
     private readonly string particleResourcePath = "Particles/";
     private readonly string noData = "NA";
     private readonly char multipleSplitChar = '#';
@@ -39,15 +41,19 @@ public class DataManager : Singleton<DataManager>
     public List<GameObject> particles { get; private set; }
     public Dictionary<Skills, Dictionary<SkillStats, object>> skillDictionary { get; private set; }
     public Dictionary<Weapons, Dictionary<statType, object>> statDictionary { get; private set; }
-    public Dictionary<string, string> stringData { get; private set; }
+    public TextManager textManager { get; private set; }
     #endregion
 
     protected override void Awake()
     {
         base.Awake();
+        
         InitializeCharacterDatas();
         InitializeSkillDatas();
         InitializeParticles();
+
+        textManager = GetComponent<TextManager>();
+        InitializeStringDatas();
 
         //// Cool Time Data Initialization --------------------------------------
         coolTimeUIManager = FindObjectOfType<CoolTimeManager>();
@@ -61,33 +67,39 @@ public class DataManager : Singleton<DataManager>
         }
     }
 
+    private void Update()
+    {
+        foreach (var data in coolTimeDatas)
+        {
+            data.CurrentCoolTime -= Time.deltaTime;
+        }
+    }
+
+
+    public string GetString(string key)
+    {
+        return textManager.GetStringData(key);
+    }
+
     private void InitializeParticles()
     {
         particles = new List<GameObject>();
-        for(int i = 0; i < (int)Skills.SkillCount; i++)
+        for (int i = 0; i < (int)Skills.SkillCount; i++)
         {
             if (!skillDictionary[(Skills)i].ContainsKey(SkillStats.particles)) continue;
 
             string particleString = skillDictionary[(Skills)i][SkillStats.particles].ToString();
             string[] particles = particleString.Split(multipleSplitChar);
-            foreach(var particle in particles)
+            foreach (var particle in particles)
             {
                 var obj = (GameObject)Resources.Load(particleResourcePath + particle);
-                if(obj == null)
+                if (obj == null)
                 {
                     Debug.LogWarning($"{particle} does not exist in resources folder");
                     continue;
                 }
                 this.particles.Add(obj);
             }
-        }
-    }
-
-    private void Update()
-    {
-        foreach (var data in coolTimeDatas)
-        {
-            data.CurrentCoolTime -= Time.deltaTime;
         }
     }
 
@@ -155,6 +167,24 @@ public class DataManager : Singleton<DataManager>
 
     private void InitializeStringDatas()
     {
+        StreamReader reader = new StreamReader(Application.dataPath + path + stringDataCSV);
+        bool isEndofFile = false;
+        int cursor = 0;
+        textManager.stringData = new();
+        while (!isEndofFile)
+        {
+            string data = reader.ReadLine();
+            if (cursor == 0) { cursor++; continue; }
 
+            if (data == null)
+            {
+                isEndofFile = true;
+                break;
+            }
+            string[] splitData = data.Split(',');
+
+            textManager.stringData.Add(splitData[0], splitData[1]);
+            cursor++;
+        }
     }
 }
