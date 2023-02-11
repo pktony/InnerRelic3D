@@ -75,7 +75,6 @@ public class DataManager : Singleton<DataManager>
         }
     }
 
-
     public string GetString(string key)
     {
         return textManager.GetStringData(key);
