@@ -20,14 +20,13 @@ public class PlayerController_Archer : PlayerController
     private int chargeCount = 1;
     private int maxChargeCount;
     private const float MIN_INITIAL_VELOCITY_X = 10f;
-    private Vector3 currentVelocity;
     private List<Vector3> trajectoryPoints;
 
     private WaitForSeconds chargeWaitSeconds;
     private WaitForSeconds bezierWaitSeconds;
     [SerializeField] float bezierInterval = 0.1f;
 
-    public Vector3 CurrentVelocity => currentVelocity;
+    public Vector3 CurrentVelocity { get; private set; }
 
     #region UNITY EVENT 함수 ###################################################
     protected override void Awake()
@@ -45,7 +44,7 @@ public class PlayerController_Archer : PlayerController
     protected override void Start()
     {
         base.Start();
-        var skillDat = DataManager.Inst.skillDictionary[Skills.SpecialAttack_Archer];
+        var skillDat = dataManager.skillDictionary[Skills.SpecialAttack_Archer];
         chargeWaitSeconds = new WaitForSeconds((float)skillDat[SkillStats.interval]);
         maxChargeCount = System.Convert.ToInt32(skillDat[SkillStats.tickNum]);
 
@@ -62,7 +61,7 @@ public class PlayerController_Archer : PlayerController
         //  - 초기 속도
         //  - 초기 위치
         //  - 시간 또는 거리 
-        currentVelocity = Vector3.zero;
+        CurrentVelocity = Vector3.zero;
         Vector3 currentPosition = firePosition[0].position;
         float elapsedTime = 0f;
 
@@ -74,12 +73,12 @@ public class PlayerController_Archer : PlayerController
             // y = 0.5gt^2
             // 거리 = 시간 * 속력
 
-            currentVelocity += MIN_INITIAL_VELOCITY_X * transform.forward + Physics.gravity * elapsedTime;
+            CurrentVelocity += MIN_INITIAL_VELOCITY_X * transform.forward + Physics.gravity * elapsedTime;
             //currentPosition += currentVelocity * elapsedTime;
             currentPosition = new Vector3(0,
-                 shootPositions.transform.position.y + currentVelocity.y * elapsedTime
+                 shootPositions.transform.position.y + CurrentVelocity.y * elapsedTime
                     - Physics.gravity.y * Mathf.Pow(elapsedTime, 2) * 0.5f,
-                 currentVelocity.z * elapsedTime);
+                 CurrentVelocity.z * elapsedTime);
 
             trajectoryPoints.Add(currentPosition);
             lineRend.positionCount = trajectoryPoints.Count;
@@ -173,51 +172,50 @@ public class PlayerController_Archer : PlayerController
 
     protected override void OnSpecialAttack(InputAction.CallbackContext context)
     {
-        if (DataManager.Inst.coolTimeDatas[(int)Skills.SpecialAttack_Archer].IsReadyToUse())
-        {
-            if (context.performed)
-            {// Charging 애니메이션까지는 자동으로 넘어간다
-                prevControlMode = playerStats.ControlMode;
-                playerStats.ControlMode = ControlMode.AimMode;
-                isCharging = true;
-                anim.SetBool("isSpecialAttack", isCharging);
-                currentVelocity = MIN_INITIAL_VELOCITY_X * MIN_INITIAL_VELOCITY_X * transform.forward;
-                if (playerStats.LockonTarget == null)
-                {// 락온 상태가 아니면 일반 Charging
-                    StartCoroutine(SpecialCharging(1, 5));
-                }
-                else // 베지어 활 Charging
-                    StartCoroutine(SpecialCharging(5, maxChargeCount, 10));
-            }
-            else if (context.canceled)
-            {// 특수공격 발사
-                playerStats.ControlMode = prevControlMode;
-                isCharging = false;
-                anim.SetBool("isSpecialAttack", isCharging);
+        if ( ! dataManager.coolTimeDatas[(int)Skills.SpecialAttack_Archer].IsReadyToUse())
+            return;
 
-                if (playerStats.LockonTarget == null)
-                {// 락온 타겟이 없으면 전방에 일정 각도로 퍼지는 공격 
-                    shootPositions.ActivateShootPositions(chargeCount);
-                    ShootArrows(chargeCount, arrowSpecial_Prefab);
-                    shootPositions.ActivateShootPositions(1);  // 원래대로 돌아오기
-                }
-                else
-                {// 락온 타겟이 있으면 베지어 곡선을 따라가는 화살 발사 
-                    StartCoroutine(ShootBezierArrows(chargeCount));
-                }
-                DataManager.Inst.coolTimeDatas[(int)Skills.SpecialAttack_Archer].ResetCoolTime();
+        if (context.performed)
+        {// Charging 애니메이션까지는 자동으로 넘어간다
+            prevControlMode = playerStats.ControlMode;
+            playerStats.ControlMode = ControlMode.AimMode;
+            isCharging = true;
+            anim.SetBool("isSpecialAttack", isCharging);
+            CurrentVelocity = MIN_INITIAL_VELOCITY_X * MIN_INITIAL_VELOCITY_X * transform.forward;
+            if (playerStats.LockonTarget == null)
+            {// 락온 상태가 아니면 일반 Charging
+                StartCoroutine(SpecialCharging(1, 5));
             }
+            else // 베지어 활 Charging
+                StartCoroutine(SpecialCharging(5, maxChargeCount, 10));
+        }
+        else if (context.canceled)
+        {// 특수공격 발사
+            playerStats.ControlMode = prevControlMode;
+            isCharging = false;
+            anim.SetBool("isSpecialAttack", isCharging);
+
+            if (playerStats.LockonTarget == null)
+            {// 락온 타겟이 없으면 전방에 일정 각도로 퍼지는 공격 
+                shootPositions.ActivateShootPositions(chargeCount);
+                ShootArrows(chargeCount, arrowSpecial_Prefab);
+                shootPositions.ActivateShootPositions(1);  // 원래대로 돌아오기
+            }
+            else
+            {// 락온 타겟이 있으면 베지어 곡선을 따라가는 화살 발사 
+                StartCoroutine(ShootBezierArrows(chargeCount));
+            }
+            dataManager.coolTimeDatas[(int)Skills.SpecialAttack_Archer].ResetCoolTime();
         }
     }
 
     protected override void OnRightClick(InputAction.CallbackContext _)
     {// 회피 기술 사용 
-        if(DataManager.Inst.coolTimeDatas[(int)Skills.Dodge].IsReadyToUse())
-        {
-            anim.SetTrigger("onDodge");
-            DataManager.Inst.coolTimeDatas[(int)Skills.Dodge].ResetCoolTime();
-            controller.detectCollisions = false;    // 사용 시간 동안 무적
-        }
+        if ( ! dataManager.coolTimeDatas[(int)Skills.Dodge].IsReadyToUse()) return;
+
+        anim.SetTrigger("onDodge");
+        dataManager.coolTimeDatas[(int)Skills.Dodge].ResetCoolTime();
+        controller.detectCollisions = false;    // 사용 시간 동안 무적
     }
     #endregion
 }

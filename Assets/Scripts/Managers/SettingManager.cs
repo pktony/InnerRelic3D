@@ -7,29 +7,25 @@ using System.IO;
 /// </summary>
 public class SettingManager : Singleton<SettingManager>
 {
-    private PanelResizer panel;
-    public PanelResizer Panel => panel;
-
     // Save 관련 -------------------------------------------
     // Setting
     private readonly string settingSaveFileName = "SettingData.json";
-    private SettingData settingData = new();
     // Rank
     private readonly string rankSaveFileName = "RankData.json";
     private RankData rankData;
     private LeaderBoard_Home board_Home;
     private LeaderBoard_InGame board_InGame;
     private const int rankCount = 6;
-    private float[] scores;
 
-    public float[] Scores => scores;
-    public SettingData SettingData => settingData;
+    public float[] Scores { get; private set; }
+    public SettingData SettingData { get; private set; }
+    public PanelResizer Panel { get; private set; }
 
     protected override void Awake()
     {
         base.Awake();
         rankData = new();
-        scores = new float[rankCount];
+        Scores = new float[rankCount];
         SceneManager.sceneLoaded += Initialize;
 
         Application.targetFrameRate = 30;
@@ -41,17 +37,18 @@ public class SettingManager : Singleton<SettingManager>
         {// 최초 로드데이터가 없으면 새로 저장 후 불러오기
             SaveSettingValues();
             LoadSettingValues();
-        }    
-        SoundManager.Inst.MasterVol = settingData.masterVolume;
-        SoundManager.Inst.MusicVolume = settingData.musicVolume;
+        }
+        SettingData = new();
+        SoundManager.Inst.MasterVol = SettingData.masterVolume;
+        SoundManager.Inst.MusicVolume = SettingData.musicVolume;
 
         // 랭킹 데이터 불러와서 입력 
         rankData = LoadRankDatas();
-        scores = rankData.scores;
+        Scores = rankData.scores;
 
         if (arg0 == SceneManager.GetSceneByName("Home"))
         {
-            panel = FindObjectOfType<PanelResizer>();
+            Panel = FindObjectOfType<PanelResizer>();
             board_Home = FindObjectOfType<LeaderBoard_Home>();
             board_Home.RefreshLeaderBoard();
         }
@@ -65,7 +62,7 @@ public class SettingManager : Singleton<SettingManager>
     public void SaveSettingValues()
     {
         // 클래스를 Json 형식으로 전환
-        string ToJsonData = JsonUtility.ToJson(settingData);
+        string ToJsonData = JsonUtility.ToJson(SettingData);
         // https://docs.unity3d.com/ScriptReference/Application-persistentDataPath.html
         string filePath = $"{Application.persistentDataPath}/{settingSaveFileName}";
 
@@ -84,7 +81,7 @@ public class SettingManager : Singleton<SettingManager>
         {// 이미 있으면
             // 저장된 파일 읽어오고 Json을 클래스 형식으로 전환
             string FromJsonData = File.ReadAllText(filePath);
-            settingData = JsonUtility.FromJson<SettingData>(FromJsonData);
+            SettingData = JsonUtility.FromJson<SettingData>(FromJsonData);
             //print("불러오기 완료");
             result = true;
             return result;
@@ -129,7 +126,7 @@ public class SettingManager : Singleton<SettingManager>
         }
         else
         {
-            rankData.scores = scores;
+            rankData.scores = Scores;
             SaveGameRank();
             //print("랭킹 기록 없음 ");
             return rankData;
@@ -142,13 +139,13 @@ public class SettingManager : Singleton<SettingManager>
     {
         for(int i = 0; i < rankCount; i++)
         {
-            if (scores[i] <= newScore)
+            if (Scores[i] <= newScore)
             {// 새로운 점수가 더 낮거나 같으면 해당 index에 새로운 점수 저장 
                 for(int j = rankCount - 1; j > i; j--)
                 {// 한칸씩 뒤로 밀기 
-                    scores[j] = scores[j - 1];
+                    Scores[j] = Scores[j - 1];
                 }
-                scores[i] = newScore;
+                Scores[i] = newScore;
                 SaveGameRank();
                 UIManager.Inst.LeaderBoard_InGame.RefreshLeaderBoard();
                 UIManager.Inst.InfoPanel.ShowPanel(
