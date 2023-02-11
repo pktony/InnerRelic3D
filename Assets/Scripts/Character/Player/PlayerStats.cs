@@ -90,7 +90,7 @@ public class PlayerStats : MonoBehaviour, IHealth, IBattle
     public float MaxHP { get; private set; }
     public float AttackPower { get; private set; }
     public float DefencePower { get; private set; }
-    public float moveSpeed { get; set; }
+    public float moveSpeed { get; private set; }
     public bool IsDefending { get; private set; }
     #endregion
 
@@ -128,6 +128,7 @@ public class PlayerStats : MonoBehaviour, IHealth, IBattle
                 Particles[i] = InitializeParticles(dataManager.particles[i]);
         }
 
+        IsDead = false;
         HP = MaxHP;
     }
 

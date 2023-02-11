@@ -28,8 +28,7 @@ public abstract class PlayerController : MonoBehaviour
     // ################### Move #######################
     private Vector3 moveDir = Vector3.zero;
     private Quaternion relativeMoveDir = Quaternion.identity;
-
-    [SerializeField] float walkSpeed = 3.0f;
+    private float currentSpeed;
 
     // ################### Look ########################
     private Vector3 keyboardInputDirection = Vector3.zero;
@@ -75,8 +74,6 @@ public abstract class PlayerController : MonoBehaviour
         playerStats = GameManager.Inst.Player_Stats;
         soundManager = SoundManager.Inst;
         dataManager = DataManager.Inst;
-
-        playerStats.moveSpeed = walkSpeed;
     }
 
     private void OnEnable()
@@ -171,7 +168,7 @@ public abstract class PlayerController : MonoBehaviour
                 }
                 break;
         }
-        controller.Move(playerStats.moveSpeed * Time.fixedDeltaTime * moveDir);
+        controller.Move(currentSpeed * Time.fixedDeltaTime * moveDir);
     }
 
     private void OnMoveInput(InputAction.CallbackContext context)
@@ -180,8 +177,8 @@ public abstract class PlayerController : MonoBehaviour
 
         Vector3 inputDir = context.ReadValue<Vector2>();
         keyboardInputDirection = new Vector3(inputDir.x, 0, inputDir.y);
-        playerStats.moveSpeed = keyboardInputDirection.sqrMagnitude > 0 ?
-            walkSpeed * inputDir.normalized.sqrMagnitude : 0f;
+        currentSpeed = keyboardInputDirection.sqrMagnitude > 0 ?
+            playerStats.moveSpeed * inputDir.normalized.sqrMagnitude : 0f;
 
         if (playerStats.ControlMode != ControlMode.LockedOn)
         {
@@ -192,7 +189,7 @@ public abstract class PlayerController : MonoBehaviour
             }
         }
 
-        anim.SetFloat(Speed, playerStats.moveSpeed);
+        anim.SetFloat(Speed, currentSpeed);
     }
 
     protected virtual void OnAttack(InputAction.CallbackContext _) { }
